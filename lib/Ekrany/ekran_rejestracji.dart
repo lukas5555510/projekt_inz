@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:inzynierka/Ekrany/ekran_glowny.dart';
+import 'package:inzynierka/Ekrany/ekran_logowania.dart';
 import 'package:inzynierka/Reusable_widgets/reusable_widget.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -43,7 +44,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   FirebaseAuth.instance.createUserWithEmailAndPassword(email: _emailTextController.text,
                       password: _passwordTextController.text).then((value) {
                         print("Utworzono nowe konto");
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const MapSample()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const LogInScreen()));
                   }).onError((error, stackTrace) {
                     print("Error ${error.toString()}");
                   });

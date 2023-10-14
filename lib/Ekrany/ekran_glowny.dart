@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:inzynierka/Ekrany/ekran_dodania_wydarzenia.dart';
 import 'package:location/location.dart';
 
 class MapSample extends StatefulWidget {
@@ -142,6 +143,13 @@ class MapSampleState extends State<MapSample> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const EventScreen()));
+          },
+          child: const Icon(Icons.add),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
         body: GoogleMap(
           mapType: MapType.normal,
           initialCameraPosition: _kGooglePlex ?? _kLake,

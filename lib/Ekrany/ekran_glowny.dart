@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'ekran_dodawania_wydarzenia.dart';
 
 class MapSample extends StatefulWidget {
   const MapSample({super.key});
@@ -84,60 +85,27 @@ class MapSampleState extends State<MapSample> {
 
   void _onMapTapped(LatLng tappedLocation) {
     if (isAddingMarker) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          String newMarkerTitle = markerTitle ?? '';
-          String newMarkerSnippet = markerSnippet ?? '';
-
-          return AlertDialog(
-            title: Text('Wprowadź dane znacznika'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                TextField(
-                  decoration: InputDecoration(labelText: 'Tytuł znacznika'),
-                  onChanged: (text) {
-                    newMarkerTitle = text;
-                  },
-                ),
-                TextField(
-                  decoration: InputDecoration(labelText: 'Opis znacznika'),
-                  onChanged: (text) {
-                    newMarkerSnippet = text;
-                  },
-                ),
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text('Anuluj'),
-                onPressed: () {
-                  setState(() {
-                    isAddingMarker = false; // Wyłącz tryb dodawania znacznika
-                  });
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: Text('Dodaj znacznik'),
-                onPressed: () {
-                  if (newMarkerTitle.isNotEmpty & newMarkerSnippet.isNotEmpty) {
-                    // Dodaj znacznik tylko gdy są dwa pola wypełnione
-                    _addMarker(tappedLocation, newMarkerTitle, newMarkerSnippet);
-                    setState(() {
-                      isAddingMarker = false; // Wyłącz tryb dodawania znacznika
-                    });
-                    Navigator.of(context).pop();
-                  }
-                },
-              ),
-            ],
-          );
-        },
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MarkerDetailsScreen(
+            onMarkerSaved: (title, snippet) {
+              if (title.isNotEmpty && snippet.isNotEmpty) {
+                _addMarker(tappedLocation, title, snippet);
+              }
+            },
+            onMarkerCancelled: () {
+              setState(() {
+                isAddingMarker = false;
+              });
+            },
+          ),
+        ),
       );
     }
   }
+
+
 
 
   @override

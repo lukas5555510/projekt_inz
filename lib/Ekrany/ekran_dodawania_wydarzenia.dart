@@ -17,9 +17,9 @@ class _EventScreenState extends State<EventScreen> {
     return Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-        backgroundColor: Colors.green,
-        elevation: 0,
-        title: const Text("Wybierz wydarzenie/incydent", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
-    ));
+          backgroundColor: Colors.green,
+          elevation: 0,
+          title: const Text("Wybierz wydarzenie/incydent", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
+        ));
   }
 }

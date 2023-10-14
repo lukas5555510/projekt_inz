@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:inzynierka/Ekrany/ekran_dodania_wydarzenia.dart';
 import 'package:location/location.dart';
 
 class MapSample extends StatefulWidget {
@@ -16,20 +15,27 @@ class MapSampleState extends State<MapSample> {
   final Completer<GoogleMapController> _controller =
   Completer<GoogleMapController>();
   LatLng? _latLng;
-
   CameraPosition? _kGooglePlex;
+  List<Marker> markers = [];
+  String? markerTitle;
+  String? markerSnippet;
+  bool isAddingMarker = false; // Dodaj zmienną do sterowania trybem dodawania znacznika
 
   static const CameraPosition _kLake = CameraPosition(
     bearing: 192.8334901395799,
-    target: LatLng(37.43296265331129, -122.08832357078792),
+    target: LatLng(51.2362765276371, 22.58917608263832),
     tilt: 59.440717697143555,
     zoom: 19.151926040649414,
   );
 
-  List<Marker> markers = [];
+  @override
+  void initState() {
+    super.initState();
+    getCurrentLocation();
+  }
+
   Future<void> getCurrentLocation() async {
     Location location = Location();
-
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
     LocationData _locationData;
@@ -51,14 +57,9 @@ class MapSampleState extends State<MapSample> {
     }
 
     _locationData = await location.getLocation();
-
     _latLng = LatLng(_locationData.latitude!, _locationData.longitude!);
-    _kGooglePlex = CameraPosition(
-      target: _latLng!,
-      zoom: 14.4746,
-    );
+    _kGooglePlex = CameraPosition(target: _latLng!, zoom: 14.4746);
 
-    // Check if _kGooglePlex is not null before updating the map position
     if (_kGooglePlex != null) {
       final GoogleMapController controller = await _controller.future;
       controller.animateCamera(CameraUpdate.newCameraPosition(_kGooglePlex!));
@@ -76,78 +77,100 @@ class MapSampleState extends State<MapSample> {
           infoWindow: InfoWindow(title: title, snippet: snippet),
         ),
       );
+      isAddingMarker = false; // Wyłącz tryb dodawania znacznika
     });
   }
-  String? markerTitle;
-  String? markerSnippet;
 
 
   void _onMapTapped(LatLng tappedLocation) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Wprowadź dane znacznika'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                decoration: InputDecoration(labelText: 'Tytuł znacznika'),
-                onChanged: (text) {
+    if (isAddingMarker) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          String newMarkerTitle = markerTitle ?? '';
+          String newMarkerSnippet = markerSnippet ?? '';
+
+          return AlertDialog(
+            title: Text('Wprowadź dane znacznika'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextField(
+                  decoration: InputDecoration(labelText: 'Tytuł znacznika'),
+                  onChanged: (text) {
+                    newMarkerTitle = text;
+                  },
+                ),
+                TextField(
+                  decoration: InputDecoration(labelText: 'Opis znacznika'),
+                  onChanged: (text) {
+                    newMarkerSnippet = text;
+                  },
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Anuluj'),
+                onPressed: () {
                   setState(() {
-                    markerTitle = text;
+                    isAddingMarker = false; // Wyłącz tryb dodawania znacznika
                   });
+                  Navigator.of(context).pop();
                 },
               ),
-              TextField(
-                decoration: InputDecoration(labelText: 'Opis znacznika'),
-                onChanged: (text) {
-                  setState(() {
-                    markerSnippet = text;
-                  });
+              TextButton(
+                child: Text('Dodaj znacznik'),
+                onPressed: () {
+                  if (newMarkerTitle.isNotEmpty & newMarkerSnippet.isNotEmpty) {
+                    // Dodaj znacznik tylko gdy są dwa pola wypełnione
+                    _addMarker(tappedLocation, newMarkerTitle, newMarkerSnippet);
+                    setState(() {
+                      isAddingMarker = false; // Wyłącz tryb dodawania znacznika
+                    });
+                    Navigator.of(context).pop();
+                  }
                 },
               ),
             ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Anuluj'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Dodaj znacznik'),
-              onPressed: () {
-                if (markerTitle != null && markerSnippet != null) {
-                  _addMarker(tappedLocation, markerTitle!, markerSnippet!);
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
+          );
+        },
+      );
+    }
   }
 
-
-
-  @override
-  void initState() {
-    super.initState();
-    getCurrentLocation();
-  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: isAddingMarker
+            ? null
+            : ElevatedButton(
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const EventScreen()));
+            setState(() {
+              isAddingMarker = true; // Włącz tryb dodawania znacznika
+            });
           },
-          child: const Icon(Icons.add),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            padding: EdgeInsets.all(5),
+          ),
+          child: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.add_circle,
+                size: 23,
+              ),
+              Text(
+                'Dodaj wydarzenie/incydent',
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+            ],
+          ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
         body: GoogleMap(
@@ -158,7 +181,7 @@ class MapSampleState extends State<MapSample> {
           onMapCreated: (GoogleMapController controller) {
             _controller.complete(controller);
           },
-          onTap: _onMapTapped, // Obsługa kliknięcia na mapie
+          onTap: _onMapTapped,
           markers: Set<Marker>.from(markers),
         ),
       ),

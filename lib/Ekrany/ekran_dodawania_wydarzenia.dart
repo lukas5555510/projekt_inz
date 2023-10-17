@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
+import 'package:inzynierka/Reusable_widgets/reusable_widget.dart';
+
 class MarkerDetailsScreen extends StatefulWidget {
-  final void Function(String title, String snippet, File? imageFile) onMarkerSaved; // Zaktualizowany typ funkcji
+  final void Function(String title, String snippet, File? imageFile) onMarkerSaved;
   final void Function() onMarkerCancelled;
 
   const MarkerDetailsScreen({
@@ -21,6 +23,8 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
   String snippet = '';
   File? imageFile;
   final ImagePicker _picker = ImagePicker();
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController snippetController = TextEditingController();
 
   Future<void> _pickImage() async {
     final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
@@ -31,33 +35,27 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
     }
   }
 
+  void _showSnackbar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blueGrey, // Zmień kolor tła
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: const Text('Marker Details', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        title: const Text('Szczegóły wydarzenia', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
       ),
-      body: Padding(
+      body: SingleChildScrollView( // Dodaj SingleChildScrollView
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            TextField(
-              onChanged: (text) {
-                setState(() {
-                  title = text;
-                });
-              },
-              decoration: const InputDecoration(labelText: 'Tytuł znacznika'),
-            ),
-            TextField(
-              onChanged: (text) {
-                setState(() {
-                  snippet = text;
-                });
-              },
-              decoration: const InputDecoration(labelText: 'Opis znacznika'),
-            ),
+            const SizedBox(height: 10,),
+            reusableTextField('Tytuł znacznika', Icons.title, false, titleController),
+            const SizedBox(height: 20,),
+            reusableTextField('Opis znacznika', Icons.description, false, snippetController),
+            const SizedBox(height: 10,),
             ElevatedButton(
               onPressed: _pickImage,
               child: const Text('Wybierz zdjęcie z galerii'),
@@ -66,8 +64,16 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
               Image.file(imageFile!, width: 200, height: 200),
             ElevatedButton(
               onPressed: () {
-                if (title.isNotEmpty && snippet.isNotEmpty) {
-                  widget.onMarkerSaved(title, snippet, imageFile); // Przekazanie trzech argumentów
+                title = titleController.text;
+                snippet = snippetController.text;
+                if (title.isEmpty) {
+                  _showSnackbar(context, 'Wprowadź tytuł znacznika');
+                } else if (snippet.isEmpty) {
+                  _showSnackbar(context, 'Wprowadź opis znacznika');
+                } else if (imageFile == null) {
+                  _showSnackbar(context, 'Dodaj zdjęcie znacznika');
+                } else {
+                  widget.onMarkerSaved(title, snippet, imageFile);
                   Navigator.pop(context);
                 }
               },
@@ -75,7 +81,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                widget.onMarkerCancelled(); // Trigger the cancel callback
+                widget.onMarkerCancelled();
                 Navigator.pop(context);
               },
               child: const Text('Anuluj'),

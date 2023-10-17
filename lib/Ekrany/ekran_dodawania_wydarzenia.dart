@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class MarkerDetailsScreen extends StatefulWidget {
-  final void Function(String title, String snippet) onMarkerSaved;
+  final void Function(String title, String snippet, File? imageFile) onMarkerSaved; // Zaktualizowany typ funkcji
   final void Function() onMarkerCancelled;
 
-  MarkerDetailsScreen({
+  const MarkerDetailsScreen({
     required this.onMarkerSaved,
     required this.onMarkerCancelled,
     Key? key,
@@ -14,10 +16,20 @@ class MarkerDetailsScreen extends StatefulWidget {
   _MarkerDetailsScreenState createState() => _MarkerDetailsScreenState();
 }
 
-
 class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
   String title = '';
   String snippet = '';
+  File? imageFile;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
+      setState(() {
+        imageFile = File(pickedImage.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +48,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                   title = text;
                 });
               },
-              decoration: InputDecoration(labelText: 'Tytuł znacznika'),
+              decoration: const InputDecoration(labelText: 'Tytuł znacznika'),
             ),
             TextField(
               onChanged: (text) {
@@ -44,12 +56,18 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                   snippet = text;
                 });
               },
-              decoration: InputDecoration(labelText: 'Opis znacznika'),
+              decoration: const InputDecoration(labelText: 'Opis znacznika'),
             ),
+            ElevatedButton(
+              onPressed: _pickImage,
+              child: const Text('Wybierz zdjęcie z galerii'),
+            ),
+            if (imageFile != null)
+              Image.file(imageFile!, width: 200, height: 200),
             ElevatedButton(
               onPressed: () {
                 if (title.isNotEmpty && snippet.isNotEmpty) {
-                  widget.onMarkerSaved(title, snippet);
+                  widget.onMarkerSaved(title, snippet, imageFile); // Przekazanie trzech argumentów
                   Navigator.pop(context);
                 }
               },

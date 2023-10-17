@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -13,14 +13,14 @@ class MapSample extends StatefulWidget {
 }
 
 class MapSampleState extends State<MapSample> {
-  final Completer<GoogleMapController> _controller =
-  Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   LatLng? _latLng;
   CameraPosition? _kGooglePlex;
   List<Marker> markers = [];
   String? markerTitle;
   String? markerSnippet;
   bool isAddingMarker = false;
+  File? selectedImageFile; // Przechowuje wybrany obraz
 
   static const CameraPosition _kLake = CameraPosition(
     bearing: 192.8334901395799,
@@ -37,28 +37,28 @@ class MapSampleState extends State<MapSample> {
 
   Future<void> getCurrentLocation() async {
     Location location = Location();
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
-    LocationData _locationData;
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+    LocationData locationData;
 
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
         return;
       }
     }
 
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
         return;
       }
     }
 
-    _locationData = await location.getLocation();
-    _latLng = LatLng(_locationData.latitude!, _locationData.longitude!);
+    locationData = await location.getLocation();
+    _latLng = LatLng(locationData.latitude!, locationData.longitude!);
     _kGooglePlex = CameraPosition(target: _latLng!, zoom: 14.4746);
 
     if (_kGooglePlex != null) {
@@ -69,17 +69,24 @@ class MapSampleState extends State<MapSample> {
     setState(() {});
   }
 
-  void _addMarker(LatLng location, String title, String snippet) {
-    setState(() {
-      markers.add(
-        Marker(
-          markerId: MarkerId(markers.length.toString()),
-          position: location,
-          infoWindow: InfoWindow(title: title, snippet: snippet),
-        ),
-      );
-      isAddingMarker = false;
-    });
+  Future<void> _addImageMarker(LatLng location, String title, String snippet) async {
+    if (selectedImageFile != null) {
+      final BitmapDescriptor imageMarker = BitmapDescriptor.fromBytes(
+          (await selectedImageFile!.readAsBytes()).buffer.asUint8List());
+
+      setState(() {
+        markers.add(
+          Marker(
+            markerId: MarkerId(markers.length.toString()),
+            position: location,
+            infoWindow: InfoWindow(title: title, snippet: snippet),
+            icon: imageMarker,
+          ),
+        );
+        isAddingMarker = false;
+        selectedImageFile = null; // Usuń wybrany obraz po dodaniu znacznika
+      });
+    }
   }
 
   @override
@@ -103,9 +110,10 @@ class MapSampleState extends State<MapSample> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => MarkerDetailsScreen(
-                        onMarkerSaved: (title, snippet) {
-                          if (title.isNotEmpty && snippet.isNotEmpty) {
-                            _addMarker(latLng, title, snippet);
+                        onMarkerSaved: (title, snippet, imageFile) {
+                          if (title.isNotEmpty && snippet.isNotEmpty && imageFile != null) {
+                            selectedImageFile = imageFile; // Przechowuj wybrany obraz
+                            _addImageMarker(latLng, title, snippet);
                           }
                         },
                         onMarkerCancelled: () {
@@ -140,7 +148,6 @@ class MapSampleState extends State<MapSample> {
                   ),
                 ),
               ),
-
           ],
         ),
         floatingActionButton: isAddingMarker

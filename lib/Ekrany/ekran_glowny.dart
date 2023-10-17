@@ -20,7 +20,7 @@ class MapSampleState extends State<MapSample> {
   List<Marker> markers = [];
   String? markerTitle;
   String? markerSnippet;
-  bool isAddingMarker = false; // Dodaj zmienną do sterowania trybem dodawania znacznika
+  bool isAddingMarker = false;
 
   static const CameraPosition _kLake = CameraPosition(
     bearing: 192.8334901395799,
@@ -78,42 +78,81 @@ class MapSampleState extends State<MapSample> {
           infoWindow: InfoWindow(title: title, snippet: snippet),
         ),
       );
-      isAddingMarker = false; // Wyłącz tryb dodawania znacznika
+      isAddingMarker = false;
     });
   }
-
-
-  void _onMapTapped(LatLng tappedLocation) {
-    if (isAddingMarker) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MarkerDetailsScreen(
-            onMarkerSaved: (title, snippet) {
-              if (title.isNotEmpty && snippet.isNotEmpty) {
-                _addMarker(tappedLocation, title, snippet);
-              }
-            },
-            onMarkerCancelled: () {
-              setState(() {
-                isAddingMarker = false;
-              });
-            },
-          ),
-        ),
-      );
-    }
-  }
-
-
-
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        body: Stack(
+          children: [
+            GoogleMap(
+              mapType: MapType.normal,
+              initialCameraPosition: _kGooglePlex ?? _kLake,
+              myLocationButtonEnabled: true,
+              padding: const EdgeInsets.only(top: 28, right: 0),
+              myLocationEnabled: true,
+              onMapCreated: (GoogleMapController controller) {
+                _controller.complete(controller);
+              },
+              onTap: (LatLng latLng) {
+                if (isAddingMarker) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MarkerDetailsScreen(
+                        onMarkerSaved: (title, snippet) {
+                          if (title.isNotEmpty && snippet.isNotEmpty) {
+                            _addMarker(latLng, title, snippet);
+                          }
+                        },
+                        onMarkerCancelled: () {
+                          setState(() {
+                            isAddingMarker = false;
+                          });
+                        },
+                      ),
+                    ),
+                  );
+                }
+              },
+              markers: Set<Marker>.from(markers),
+            ),
+            if (isAddingMarker)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  color: Colors.blue.withOpacity(0.8),
+                  padding: const EdgeInsets.all(10),
+                  child: const Center(
+                    child: Text(
+                      'Kliknij na mapę, aby wybrać miejsce wydarzenia/incydentu',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
+
+          ],
+        ),
         floatingActionButton: isAddingMarker
-            ? null
+            ? FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              isAddingMarker = false; // Wyłącz tryb dodawania znacznika
+            });
+          },
+          backgroundColor: Colors.green,
+          child: const Icon(Icons.close),
+        )
             : ElevatedButton(
           onPressed: () {
             setState(() {
@@ -122,7 +161,7 @@ class MapSampleState extends State<MapSample> {
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
-            padding: EdgeInsets.all(5),
+            padding: const EdgeInsets.all(5),
           ),
           child: const Column(
             mainAxisSize: MainAxisSize.min,
@@ -141,17 +180,6 @@ class MapSampleState extends State<MapSample> {
           ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-        body: GoogleMap(
-          mapType: MapType.normal,
-          initialCameraPosition: _kGooglePlex ?? _kLake,
-          myLocationButtonEnabled: true,
-          myLocationEnabled: true,
-          onMapCreated: (GoogleMapController controller) {
-            _controller.complete(controller);
-          },
-          onTap: _onMapTapped,
-          markers: Set<Marker>.from(markers),
-        ),
       ),
     );
   }

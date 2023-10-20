@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'ekran_dodawania_wydarzenia.dart';
 
@@ -21,6 +22,8 @@ class MapSampleState extends State<MapSample> {
   String? markerSnippet;
   bool isAddingMarker = false;
   File? selectedImageFile; // Przechowuje wybrany obraz
+  DateTime? eventDate;
+
 
   static const CameraPosition _kLake = CameraPosition(
     bearing: 192.8334901395799,
@@ -69,25 +72,7 @@ class MapSampleState extends State<MapSample> {
     setState(() {});
   }
 
-  Future<void> _addImageMarker(LatLng location, String title, String snippet) async {
-    if (selectedImageFile != null) {
-      final BitmapDescriptor imageMarker = BitmapDescriptor.fromBytes(
-          (await selectedImageFile!.readAsBytes()).buffer.asUint8List());
 
-      setState(() {
-        markers.add(
-          Marker(
-            markerId: MarkerId(markers.length.toString()),
-            position: location,
-            infoWindow: InfoWindow(title: title, snippet: snippet),
-            icon: imageMarker,
-          ),
-        );
-        isAddingMarker = false;
-        selectedImageFile = null; // Usuń wybrany obraz po dodaniu znacznika
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,20 +95,51 @@ class MapSampleState extends State<MapSample> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => MarkerDetailsScreen(
-                        onMarkerSaved: (title, snippet, imageFile) {
-                          if (title.isNotEmpty && snippet.isNotEmpty && imageFile != null) {
-                            selectedImageFile = imageFile; // Przechowuj wybrany obraz
-                            _addImageMarker(latLng, title, snippet);
-                          }
-                        },
-                        onMarkerCancelled: () {
+                        onMarkerSaved: (title, snippet, imageFile, eventType, eventDate) {
                           setState(() {
+                            markers.add(
+                              Marker(
+                                markerId: MarkerId(markers.length.toString()),
+                                position: latLng,
+                                infoWindow: InfoWindow(
+                                  title: title,
+                                  snippet: snippet,
+                                  onTap: () {
+                                    showModalBottomSheet<void>(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        eventDate = eventDate;
+                                        return Container(
+                                          height: 100,
+                                          color: Colors.white,
+                                          child: Center(
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  'Data: ${DateFormat('yyyy-MM-dd HH:mm').format(eventDate!)}',
+                                                  style: const TextStyle(fontSize: 16),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                                icon: BitmapDescriptor.fromBytes(imageFile!.readAsBytesSync()),
+                              ),
+                            );
                             isAddingMarker = false;
+                            selectedImageFile = null;
                           });
                         },
+
                       ),
                     ),
                   );
+
+
                 }
               },
               markers: Set<Marker>.from(markers),

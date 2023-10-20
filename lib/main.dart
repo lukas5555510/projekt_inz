@@ -4,6 +4,7 @@ import 'package:inzynierka/Ekrany/ekran_glowny.dart';
 import 'package:inzynierka/Ekrany/ekran_logowania.dart';
 import 'package:inzynierka/Ekrany/ekran_rejestracji.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();

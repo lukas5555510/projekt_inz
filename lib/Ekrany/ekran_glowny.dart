@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'ekran_dodawania_wydarzenia.dart';
-
+import 'package:image/image.dart' as img;
 class MapSample extends StatefulWidget {
   const MapSample({Key? key});
 
@@ -85,14 +86,20 @@ class MapSampleState extends State<MapSample> {
   }
 
   Future<void> _addImageMarker(LatLng location, String title, String snippet, DateTime eventDate) async {
+    var selectedImageFile = this.selectedImageFile;
     if (selectedImageFile != null) {
-      final BitmapDescriptor imageMarker = BitmapDescriptor.fromBytes(
-        (await selectedImageFile!.readAsBytes()).buffer.asUint8List(),
-      );
+      final img.Image originalImage = img.decodeImage(selectedImageFile.readAsBytesSync())!;
+
+      const int targetWidth = 200; // Dostosuj szerokość
+      const int targetHeight = 200; // Dostosuj wysokość
+
+      final img.Image resizedImage = img.copyResize(originalImage, width: targetWidth, height: targetHeight);
+
+      final BitmapDescriptor imageMarker = BitmapDescriptor.fromBytes(Uint8List.fromList(img.encodePng(resizedImage)));
 
       final eventDetails = EventDetails(
         title: title,
-        description: snippet, // Tutaj możesz ustawić datę wydarzenia
+        description: snippet,
         eventDate: eventDate,
       );
 
@@ -121,7 +128,6 @@ class MapSampleState extends State<MapSample> {
             },
             icon: imageMarker,
           ),
-
         );
         eventDetailsMap[location] = eventDetails;
         isAddingMarker = false;
@@ -146,7 +152,9 @@ class MapSampleState extends State<MapSample> {
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
               },
-          markers: Set<Marker>.from(markers),
+              markers: Set<Marker>.from(markers),
+              zoomControlsEnabled: false,
+              minMaxZoomPreference: const MinMaxZoomPreference(14.0, 19.0),
               onTap: (LatLng latLng) {
                 if (isAddingMarker) {
                   Navigator.push(
@@ -170,6 +178,7 @@ class MapSampleState extends State<MapSample> {
                 }
               },
             ),
+
             if (isAddingMarker)
               Positioned(
                 top: 0,

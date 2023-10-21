@@ -39,6 +39,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
   }
   final Map<String, String> eventImages = {
     "Koncert": 'lib/images/koncert.jpg',
+    "Kradzież": 'lib/images/kradzież.jpg',
 
   };
 
@@ -68,7 +69,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
             Expanded(
               child: TextField(
                 controller: dateController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Data i godzina wydarzenia',
                   prefixIcon: Icon(Icons.date_range),
                 ),
@@ -194,6 +195,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
           onChanged: (selected) {
             setState(() {
               selectedEvent = selected;
+              _loadEventImage(selected!);
             });
           },
           hint: Text('Wybierz incydent'),

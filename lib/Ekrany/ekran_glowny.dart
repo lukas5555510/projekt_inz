@@ -2,15 +2,27 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'ekran_dodawania_wydarzenia.dart';
 
 class MapSample extends StatefulWidget {
-  const MapSample({super.key});
+  const MapSample({Key? key});
 
   @override
   State<MapSample> createState() => MapSampleState();
+}
+class EventDetails {
+  final String title;
+  final String description;
+  final DateTime eventDate;
+
+
+  EventDetails({
+    required this.title,
+    required this.description,
+    required this.eventDate,
+
+  });
 }
 
 class MapSampleState extends State<MapSample> {
@@ -22,7 +34,7 @@ class MapSampleState extends State<MapSample> {
   String? markerSnippet;
   bool isAddingMarker = false;
   File? selectedImageFile; // Przechowuje wybrany obraz
-  DateTime? eventDate;
+  Map<LatLng, EventDetails> eventDetailsMap = {};
 
 
   static const CameraPosition _kLake = CameraPosition(
@@ -72,6 +84,51 @@ class MapSampleState extends State<MapSample> {
     setState(() {});
   }
 
+  Future<void> _addImageMarker(LatLng location, String title, String snippet, DateTime eventDate) async {
+    if (selectedImageFile != null) {
+      final BitmapDescriptor imageMarker = BitmapDescriptor.fromBytes(
+        (await selectedImageFile!.readAsBytes()).buffer.asUint8List(),
+      );
+
+      final eventDetails = EventDetails(
+        title: title,
+        description: snippet, // Tutaj możesz ustawić datę wydarzenia
+        eventDate: eventDate,
+      );
+
+      setState(() {
+        markers.add(
+          Marker(
+            markerId: MarkerId(markers.length.toString()),
+            position: location,
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Tytuł: $title"),
+                        Text("Opis: $snippet"),
+                        Text("Data wydarzenia: $eventDate"),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+            icon: imageMarker,
+          ),
+
+        );
+        eventDetailsMap[location] = eventDetails;
+        isAddingMarker = false;
+        selectedImageFile = null; // Usuń wybrany obraz po dodaniu znacznika
+      });
+    }
+  }
 
 
   @override
@@ -89,60 +146,29 @@ class MapSampleState extends State<MapSample> {
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
               },
+          markers: Set<Marker>.from(markers),
               onTap: (LatLng latLng) {
                 if (isAddingMarker) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => MarkerDetailsScreen(
-                        onMarkerSaved: (title, snippet, imageFile, eventType, eventDate) {
+                        onMarkerSaved: (title, snippet, imageFile, selectedEvent, eventDate ) {
+                          if (title.isNotEmpty && snippet.isNotEmpty && imageFile != null) {
+                            selectedImageFile = imageFile; // Store the selected image
+                            _addImageMarker(latLng, title, snippet, eventDate!);
+                          }
+                        },
+                        onMarkerCancelled: () {
                           setState(() {
-                            markers.add(
-                              Marker(
-                                markerId: MarkerId(markers.length.toString()),
-                                position: latLng,
-                                infoWindow: InfoWindow(
-                                  title: title,
-                                  snippet: snippet,
-                                  onTap: () {
-                                    showModalBottomSheet<void>(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        eventDate = eventDate;
-                                        return Container(
-                                          height: 100,
-                                          color: Colors.white,
-                                          child: Center(
-                                            child: Column(
-                                              children: [
-                                                Text(
-                                                  'Data: ${DateFormat('yyyy-MM-dd HH:mm').format(eventDate!)}',
-                                                  style: const TextStyle(fontSize: 16),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
-                                icon: BitmapDescriptor.fromBytes(imageFile!.readAsBytesSync()),
-                              ),
-                            );
                             isAddingMarker = false;
-                            selectedImageFile = null;
                           });
                         },
-
                       ),
                     ),
                   );
-
-
                 }
               },
-              markers: Set<Marker>.from(markers),
             ),
             if (isAddingMarker)
               Positioned(

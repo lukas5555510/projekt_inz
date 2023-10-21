@@ -11,7 +11,7 @@ class MarkerDetailsScreen extends StatefulWidget {
 
   const MarkerDetailsScreen({
     required this.onMarkerSaved,
-    Key? key,
+    Key? key, required Null Function() onMarkerCancelled,
   }) : super(key: key);
 
 

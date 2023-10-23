@@ -38,7 +38,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
   final Map<String, String> eventImages = {
-    "Koncert": 'lib/images/koncert.jpg',
+    "Koncert": 'lib/images/koncert.png',
     "Kradzież": 'lib/images/kradzież.jpg',
 
   };
@@ -49,7 +49,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
       final byteData = await rootBundle.load(imageAssetPath);
       final buffer = byteData.buffer.asUint8List();
       final tempDir = await getTemporaryDirectory();
-      final tempFilePath = '${tempDir.path}/temp_image.jpg';
+      final tempFilePath = '${tempDir.path}/temp_image_$eventType.jpg'; // Użyj rodzaju zdarzenia lub incydentu w nazwie pliku
 
       final tempFile = File(tempFilePath);
       await tempFile.writeAsBytes(buffer);
@@ -102,7 +102,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
 
                     setState(() {
                       eventDate = selectedDateTimeWithTime;
-                      final formatter = DateFormat('yyyy-MM-dd HH:mm');
+                      final formatter = DateFormat('dd-MM-yyyy HH:mm');
                       dateController.text = formatter.format(selectedDateTimeWithTime);
                     });
                   }
@@ -123,12 +123,12 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
           onChanged: (selected) {
             setState(() {
               selectedEvent = selected;
-              _loadEventImage(selected!);
+              _loadEventImage(selected!); // Zaktualizuj obraz dla wydarzenia
             });
           },
-
           hint: Text('Wybierz wydarzenie'),
         ),
+
       ],
     );
   }
@@ -174,7 +174,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
 
                     setState(() {
                       eventDate = selectedDateTimeWithTime;
-                      final formatter = DateFormat('yyyy-MM-dd HH:mm');
+                      final formatter = DateFormat('dd-MM-yyyy HH:mm');
                       dateController.text = formatter.format(selectedDateTimeWithTime);
                     });
                   }
@@ -195,11 +195,12 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
           onChanged: (selected) {
             setState(() {
               selectedEvent = selected;
-              _loadEventImage(selected!);
+              _loadEventImage(selected!); // Zaktualizuj obraz dla incydentu
             });
           },
           hint: Text('Wybierz incydent'),
         ),
+
       ],
     );
   }
@@ -248,13 +249,13 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                 title = titleController.text;
                 snippet = snippetController.text;
                 if (title.isEmpty) {
-                  _showSnackbar(context, 'Wprowadź tytuł znacznika');
+                  _showSnackbar(context, 'Wprowadź tytuł wydarzenia/incydentu');
                 } else if (snippet.isEmpty) {
-                  _showSnackbar(context, 'Wprowadź opis znacznika');
+                  _showSnackbar(context, 'Wprowadź opis wydarzenia/incydentu');
                 } else if (eventType == null) {
                   _showSnackbar(context, 'Wybierz rodzaj zdarzenia');
                 } else if (eventDate == null) {
-                  _showSnackbar(context, 'Wybierz datę zdarzenia');
+                  _showSnackbar(context, 'Wybierz datę wydarzenia/incydentu');
                 } else if (selectedEvent == null) {
                   _showSnackbar(context, 'Wybierz wydarzenie lub incydent');
                 } else {
@@ -269,7 +270,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
 
                 }
               },
-              child: const Text('Zapisz znacznik'),
+              child: const Text('Zapisz wydarzenie/incydent'),
             ),
             ElevatedButton(
               onPressed: () {

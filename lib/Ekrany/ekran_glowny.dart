@@ -7,7 +7,7 @@ import 'package:location/location.dart';
 import 'ekran_dodawania_wydarzenia.dart';
 import 'package:image/image.dart' as img;
 class MapSample extends StatefulWidget {
-  const MapSample({Key? key});
+  const MapSample({super.key});
 
   @override
   State<MapSample> createState() => MapSampleState();
@@ -102,6 +102,7 @@ class MapSampleState extends State<MapSample> {
         description: snippet,
         eventDate: eventDate,
       );
+      final formattedEventDate = eventDate.toString().substring(0, 16);
 
       setState(() {
         markers.add(
@@ -117,14 +118,46 @@ class MapSampleState extends State<MapSample> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Tytuł: $title"),
-                        Text("Opis: $snippet"),
-                        Text("Data wydarzenia: $eventDate"),
+                        ListTile(
+                          leading: const Icon(Icons.title),
+                          title: Text(
+                            "Tytuł: $title",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal,
+                              fontFamily: 'Roboto',
+                            ),
+                          ),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.description),
+                          title: Text(
+                            "Opis: $snippet",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal,
+                              fontFamily: 'Roboto',
+                            ),
+                          ),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.event),
+                          title: Text(
+                            "Data wydarzenia: $formattedEventDate",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal,
+                              fontFamily: 'Roboto',
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   );
                 },
               );
+
+
             },
             icon: imageMarker,
           ),

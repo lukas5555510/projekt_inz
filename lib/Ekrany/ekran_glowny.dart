@@ -319,7 +319,6 @@ class MapSampleState extends State<MapSample> {
                         onMarkerSaved: (title, snippet, imageFile, eventType, eventDate, eventEnd) {
                           if (title.isNotEmpty && snippet.isNotEmpty && imageFile != null) {
                             selectedImageFile = imageFile;
-                            print(eventType);
                             if (eventType== 'Wydarzenie' && eventEnd != null) {
                               // Dodaj wydarzenie z datą zakończenia
                               _addImageMarker(latLng, title, snippet, eventDate!, eventEnd);

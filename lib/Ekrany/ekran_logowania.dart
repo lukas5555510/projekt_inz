@@ -17,7 +17,15 @@ class _LogInScreenState extends State<LogInScreen> {
   final TextEditingController _emailTextController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Container(width: MediaQuery.of(context).size.width,
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text("Zaloguj się", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: Container(width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
       decoration: const BoxDecoration(color: Colors.blueGrey),
       child: SingleChildScrollView(
@@ -25,7 +33,6 @@ class _LogInScreenState extends State<LogInScreen> {
           padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).size.height *0.2, 20, 0),
           child: Column(
             children: <Widget>[
-              const SizedBox(height: 30,),
               reusableTextField("Wpisz login", Icons.person_outline, false, _emailTextController),
               const SizedBox(height: 30,),
               reusableTextField("Wpisz hasło", Icons.lock_outline, true, _passwordTextController),
@@ -35,11 +42,8 @@ class _LogInScreenState extends State<LogInScreen> {
                     password: _passwordTextController.text).then((value) {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => const MapSample()));
                 }).onError((error, stackTrace) {
-                  
                   print("Error ${error.toString()}");
                 });
-                
-
               }),
               signUpOption()
             ],

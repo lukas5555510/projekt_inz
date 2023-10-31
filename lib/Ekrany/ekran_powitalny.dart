@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:inzynierka/Ekrany/ekran_glowny.dart';
@@ -39,58 +39,66 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 label: const Text("Zaloguj się przez Google"),
                 onPressed: () async {
                   final authService = AuthService();
-                  final result = await authService.signInWithGoogle();
-
-                  if (result == null) {
-                    // Użytkownik anulował logowanie
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Logowanie przez Google anulowane.'),
-                      ),
-                    );
-                  } else if (result is User) {
-                    // Logowanie się powiodło
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => const MapSample(),
-                      ),
-                    );
-                  } else {
-                    // Wyświetl komunikat o błędzie
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Błąd logowania przez Google: $result'),
-                      ),
-                    );
+                  try {
+                    final user = await authService.signInWithGoogle();
+                    if (user != null) {
+                      // Logowanie się powiodło, przekieruj na ekran MapSample
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const MapSample(),
+                        ),
+                      );
+                    } else {
+                      // Użytkownik anulował logowanie, nie rób nic
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Anulowano logowanie przez Google'),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (e.toString() == 'PlatformException(sign_in_canceled, com.google.android.gms.common.api.ApiException: 12500: , null, null)') {
+                      // Użytkownik anulował logowanie, nie rób nic
+                    } else {
+                      // Wyświetl komunikat o błędzie
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Błąd logowania przez Google: $e'),
+                        ),
+                      );
+                    }
                   }
                 },
               ),
               const SizedBox(height: 30,),
-              signUpOption(),
+              RichText(
+                text: TextSpan(
+                  text: "Masz już konto? ",
+                  children: [
+                    TextSpan(
+                      text: "Zaloguj się",
+                      style: const TextStyle(
+                        decoration: TextDecoration.underline,
+                        color: Colors.white, // Opcjonalnie możesz zmienić kolor tekstu
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          // Obsłuż kliknięcie i przekieruj na ekran LogInScreen
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => const LogInScreen(),
+                            ),
+                          );
+                        },
+                    ),
+                  ],
+                ),
+              )
             ],
           ),
         ),
       ),
     ),
-    );
-  }
-  Row signUpOption() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text("Masz już konto? ",
-            style: TextStyle(color: Colors.white70)),
-        GestureDetector(
-          onTap: (){
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context)=> const LogInScreen()));
-          },
-          child: const Text(
-            "Zaloguj się",
-            style: TextStyle(color: Colors.white),
-          ),
-        )
-      ],
     );
   }
 }

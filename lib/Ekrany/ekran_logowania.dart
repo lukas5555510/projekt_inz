@@ -33,7 +33,7 @@ class _LogInScreenState extends State<LogInScreen> {
           padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).size.height *0.2, 20, 0),
           child: Column(
             children: <Widget>[
-              reusableTextField("Wpisz login", Icons.person_outline, false, _emailTextController),
+              reusableTextField("Wpisz email", Icons.person_outline, false, _emailTextController),
               const SizedBox(height: 30,),
               reusableTextField("Wpisz hasło", Icons.lock_outline, true, _passwordTextController),
               const SizedBox(height: 20,),

@@ -1,9 +1,12 @@
+//import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
+import 'package:inzynierka/Ekrany/controllers/event_controller.dart';
 import 'package:path_provider/path_provider.dart';
-
+import 'models/event_model.dart';
 import 'package:inzynierka/Reusable_widgets/reusable_widget.dart';
 
 class MarkerDetailsScreen extends StatefulWidget {
@@ -33,6 +36,8 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
   final TextEditingController dateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
   String? selectedEvent;
+
+  final controller = Get.put(EventController());
 
   final List<String> events = [
     "Koncert",
@@ -345,14 +350,23 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                       'eventDate': eventDate,
                       'endDate': eventEnd, // Przekaż endDate
                     });
-
+                  //gdzies tu w okolicy dodac wysylanie do firestore podobnie jak userow
+                    final event = EventModel(
+                        title: controller.title.text.trim(),
+                        snippet: controller.snippet.text.trim(),
+                        //imageFile: imageFile,
+                        //eventType: eventType,
+                        //eventDate: eventDate,
+                        //eventEnd: eventEnd
+                    );
+                    EventController.instance.createEvent(event);
                 }
               },
               child: const Text('Zapisz wydarzenie/incydent'),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context);
+                                Navigator.pop(context);
               },
               child: const Text('Anuluj'),
             )

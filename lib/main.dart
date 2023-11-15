@@ -2,7 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:inzynierka/Ekrany/ekran_glowny.dart';
 import 'package:inzynierka/Ekrany/ekran_logowania.dart';
+import 'package:inzynierka/Ekrany/ekran_powitalny.dart';
 import 'package:inzynierka/Ekrany/ekran_rejestracji.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +22,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MapSample(),
+      home: const WelcomeScreen(),
     );
   }
 }

@@ -1,12 +1,11 @@
-//import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:inzynierka/Ekrany/controllers/event_controller.dart';
 import 'package:path_provider/path_provider.dart';
-import 'models/event_model.dart';
 import 'package:inzynierka/Reusable_widgets/reusable_widget.dart';
 
 class MarkerDetailsScreen extends StatefulWidget {
@@ -31,6 +30,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
   String? eventType;
   DateTime? eventDate;
   DateTime? eventEnd;
+  LatLng? location;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController snippetController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
@@ -350,16 +350,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                       'eventDate': eventDate,
                       'endDate': eventEnd, // Przekaż endDate
                     });
-                  //gdzies tu w okolicy dodac wysylanie do firestore podobnie jak userow
-                    final event = EventModel(
-                        title: controller.title.text.trim(),
-                        snippet: controller.snippet.text.trim(),
-                        //imageFile: imageFile,
-                        //eventType: eventType,
-                        //eventDate: eventDate,
-                        //eventEnd: eventEnd
-                    );
-                    EventController.instance.createEvent(event);
+
                 }
               },
               child: const Text('Zapisz wydarzenie/incydent'),

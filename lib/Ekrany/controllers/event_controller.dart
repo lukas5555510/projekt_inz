@@ -8,7 +8,7 @@ class EventController extends GetxController{
   final title = TextEditingController();
   final snippet = TextEditingController();
   //final imageFile= TextEditingController();
- // final eventType= TextEditingController();
+  //final eventType= TextEditingController();
   //final eventDate = TextEditingController();
   //final eventEnd = TextEditingController();
 

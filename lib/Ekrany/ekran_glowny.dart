@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -320,9 +324,34 @@ class MapSampleState extends State<MapSample> {
                           if (title.isNotEmpty && snippet.isNotEmpty && imageFile != null) {
                             selectedImageFile = imageFile;
                             if (eventType== 'Wydarzenie' && eventEnd != null) {
+
+                              //Dane zalogowanego uzytkownika
+                              String? userid = FirebaseAuth.instance.currentUser?.uid;
+                              if(userid == null)
+                                {
+
+                                }else {
+                                //Dodawanie do bazy danych
+                                HashMap<String, Object> map = HashMap();
+                                map["title"] = title;
+                                map["snipped"] = snippet;
+                                map["imageFile"] = imageFile.toString();
+                                map["eventType"] = eventType.toString();
+                                map["eventDate"] = eventDate.toString();
+                                map["endDate"] = eventEnd.toString();
+                                map["location"] = latLng.toString();
+                                map["authorUid"] = userid.toString();
+                                final fbapp = Firebase.app();
+                                final rtdb = FirebaseDatabase.instanceFor(
+                                    app: fbapp,
+                                    databaseURL: 'https://inzynierka-58aab-default-rtdb.europe-west1.firebasedatabase.app/');
+                                rtdb.ref().child("RTDB").child("Events")
+                                    .push()
+                                    .update(map);
+                              }
                               // Dodaj wydarzenie z datą zakończenia
                               _addImageMarker(latLng, title, snippet, eventDate!, eventEnd);
-                            } else {
+                            } else if(eventType == "Incydent") {
                               // Dodaj incydent (bez daty zakończenia)
                               _addImageMarkerIncident(latLng, title, snippet, eventDate!);
                             }

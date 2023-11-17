@@ -6,6 +6,8 @@ import 'package:inzynierka/Ekrany/models/event_model.dart';
 class EventRepository extends GetxController {
   static EventRepository get instance => Get.find();
   final _db = FirebaseFirestore.instance;
+
+
   createEvent(EventModel event) async {
     await _db
         .collection("events")

@@ -69,7 +69,7 @@ class _VerifyImagePageState extends State<VerifyImagePage> {
 
   @override
   Widget build(BuildContext context) => isEmailVerified
-      ? const MapSample()
+      ? const MapScreen()
       : Scaffold(
           appBar: AppBar(
             title: const Text('Zweryfikuj Email'),

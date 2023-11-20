@@ -3,47 +3,50 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:inzynierka/Ekrany/ekran_profilu.dart';
+import 'package:inzynierka/Ekrany/ekran_ustawie%C5%84.dart';
 import 'package:location/location.dart';
 import 'ekran_dodawania_wydarzenia.dart';
 import 'package:image/image.dart' as img;
-class MapSample extends StatefulWidget {
-  const MapSample({super.key});
+import 'package:page_transition/page_transition.dart';
+
+class MapScreen extends StatefulWidget {
+  const MapScreen({super.key});
 
   @override
-  State<MapSample> createState() => MapSampleState();
+  State<MapScreen> createState() => MapScreenState();
 }
+
 class EventDetails {
   final String title;
   final String description;
   final DateTime eventDate;
   final DateTime eventEnd;
 
-
   EventDetails({
     required this.title,
     required this.description,
     required this.eventDate,
     required this.eventEnd,
-
   });
 }
 
 class EventDetailsIncident {
-   final String title;
+  final String title;
   final String description;
-   final DateTime eventDate;
-
+  final DateTime eventDate;
 
   EventDetailsIncident({
     required this.title,
     required this.description,
     required this.eventDate,
-
   });
 }
 
-class MapSampleState extends State<MapSample> {
-  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+class MapScreenState extends State<MapScreen> {
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
   LatLng? _latLng;
   CameraPosition? _kGooglePlex;
   List<Marker> markers = [];
@@ -53,7 +56,6 @@ class MapSampleState extends State<MapSample> {
   File? selectedImageFile; // Przechowuje wybrany obraz
   Map<LatLng, EventDetails> eventDetailsMap = {};
   Map<LatLng, EventDetailsIncident> eventDetailsMapIncident = {};
-
 
   static const CameraPosition _kLake = CameraPosition(
     bearing: 192.8334901395799,
@@ -103,29 +105,31 @@ class MapSampleState extends State<MapSample> {
   }
 
   Future<void> _addImageMarkerIncident(
-      LatLng location,
-      String title,
-      String snippet,
-      DateTime eventDate,
-      ) async {
+    LatLng location,
+    String title,
+    String snippet,
+    DateTime eventDate,
+  ) async {
     var selectedImageFile = this.selectedImageFile;
     if (selectedImageFile != null) {
-      final img.Image originalImage = img.decodeImage(selectedImageFile.readAsBytesSync())!;
+      final img.Image originalImage =
+          img.decodeImage(selectedImageFile.readAsBytesSync())!;
 
       const int targetWidth = 200; // Dostosuj szerokość
       const int targetHeight = 200; // Dostosuj wysokość
 
-      final img.Image resizedImage = img.copyResize(originalImage, width: targetWidth, height: targetHeight);
+      final img.Image resizedImage = img.copyResize(originalImage,
+          width: targetWidth, height: targetHeight);
 
-      final BitmapDescriptor imageMarker = BitmapDescriptor.fromBytes(Uint8List.fromList(img.encodePng(resizedImage)));
+      final BitmapDescriptor imageMarker = BitmapDescriptor.fromBytes(
+          Uint8List.fromList(img.encodePng(resizedImage)));
 
-        final eventDetailsIncident = EventDetailsIncident(
+      final eventDetailsIncident = EventDetailsIncident(
         title: title,
         description: snippet,
         eventDate: eventDate,
       );
       final formattedEventDate = eventDate.toString().substring(0, 16);
-
 
       setState(() {
         markers.add(
@@ -190,23 +194,21 @@ class MapSampleState extends State<MapSample> {
     }
   }
 
-  Future<void> _addImageMarker(
-      LatLng location,
-      String title,
-      String snippet,
-      DateTime eventDate,
-      DateTime eventEnd
-      ) async {
+  Future<void> _addImageMarker(LatLng location, String title, String snippet,
+      DateTime eventDate, DateTime eventEnd) async {
     var selectedImageFile = this.selectedImageFile;
     if (selectedImageFile != null) {
-      final img.Image originalImage = img.decodeImage(selectedImageFile.readAsBytesSync())!;
+      final img.Image originalImage =
+          img.decodeImage(selectedImageFile.readAsBytesSync())!;
 
       const int targetWidth = 200; // Dostosuj szerokość
       const int targetHeight = 200; // Dostosuj wysokość
 
-      final img.Image resizedImage = img.copyResize(originalImage, width: targetWidth, height: targetHeight);
+      final img.Image resizedImage = img.copyResize(originalImage,
+          width: targetWidth, height: targetHeight);
 
-      final BitmapDescriptor imageMarker = BitmapDescriptor.fromBytes(Uint8List.fromList(img.encodePng(resizedImage)));
+      final BitmapDescriptor imageMarker = BitmapDescriptor.fromBytes(
+          Uint8List.fromList(img.encodePng(resizedImage)));
 
       final eventDetails = EventDetails(
         title: title,
@@ -216,7 +218,6 @@ class MapSampleState extends State<MapSample> {
       );
       final formattedEventDate = eventDate.toString().substring(0, 16);
       final formattedEventEnd = eventEnd.toString().substring(0, 16);
-
 
       setState(() {
         markers.add(
@@ -292,10 +293,52 @@ class MapSampleState extends State<MapSample> {
     }
   }
 
+  void _navigateToScreen(BuildContext context, Widget screen) {
+    Navigator.push(
+      context,
+      PageTransition(
+        type: PageTransitionType.fade, // Możesz dostosować animację według potrzeb
+        child: screen,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        bottomNavigationBar: GNav(
+          backgroundColor: Colors.green,
+          color: Colors.white,
+          activeColor: Colors.white,
+          tabBackgroundColor: Colors.lightGreen,
+          gap: 8,
+          padding: EdgeInsets.all(20),
+          selectedIndex: 0,
+          tabs: [
+            GButton(
+              icon: Icons.map,
+              text: "Mapa",
+              onPressed: () {
+                    _navigateToScreen(context, const MapScreen());
+              },
+            ),
+            GButton(
+              icon: Icons.person,
+              text: "Profil",
+              onPressed: () {
+                _navigateToScreen(context, const ProfileScreen());
+              },
+            ),
+            GButton(
+              icon: Icons.settings,
+              text: "Ustawienia",
+              onPressed: () {
+                _navigateToScreen(context, const SettingsScreen());
+              },
+            ),
+          ],
+        ),
         body: Stack(
           children: [
             GoogleMap(
@@ -316,15 +359,20 @@ class MapSampleState extends State<MapSample> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => MarkerDetailsScreen(
-                        onMarkerSaved: (title, snippet, imageFile, eventType, eventDate, eventEnd) {
-                          if (title.isNotEmpty && snippet.isNotEmpty && imageFile != null) {
+                        onMarkerSaved: (title, snippet, imageFile, eventType,
+                            eventDate, eventEnd) {
+                          if (title.isNotEmpty &&
+                              snippet.isNotEmpty &&
+                              imageFile != null) {
                             selectedImageFile = imageFile;
-                            if (eventType== 'Wydarzenie' && eventEnd != null) {
+                            if (eventType == 'Wydarzenie' && eventEnd != null) {
                               // Dodaj wydarzenie z datą zakończenia
-                              _addImageMarker(latLng, title, snippet, eventDate!, eventEnd);
+                              _addImageMarker(
+                                  latLng, title, snippet, eventDate!, eventEnd);
                             } else {
                               // Dodaj incydent (bez daty zakończenia)
-                              _addImageMarkerIncident(latLng, title, snippet, eventDate!);
+                              _addImageMarkerIncident(
+                                  latLng, title, snippet, eventDate!);
                             }
                           }
                         },
@@ -339,7 +387,6 @@ class MapSampleState extends State<MapSample> {
                 }
               },
             ),
-
             if (isAddingMarker)
               Positioned(
                 top: 0,
@@ -364,42 +411,43 @@ class MapSampleState extends State<MapSample> {
         ),
         floatingActionButton: isAddingMarker
             ? FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              isAddingMarker = false; // Wyłącz tryb dodawania znacznika
-            });
-          },
-          backgroundColor: Colors.green,
-          child: const Icon(Icons.close),
-        )
+                onPressed: () {
+                  setState(() {
+                    isAddingMarker = false; // Wyłącz tryb dodawania znacznika
+                  });
+                },
+                backgroundColor: Colors.green,
+                child: const Icon(Icons.close),
+              )
             : ElevatedButton(
-          onPressed: () {
-            setState(() {
-              isAddingMarker = true; // Włącz tryb dodawania znacznika
-            });
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            padding: const EdgeInsets.all(5),
-          ),
-          child: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.add_circle,
-                size: 23,
-              ),
-              Text(
-                'Dodaj wydarzenie/incydent',
-                style: TextStyle(
-                  fontSize: 18,
+                onPressed: () {
+                  setState(() {
+                    isAddingMarker = true; // Włącz tryb dodawania znacznika
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.all(5),
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.add_circle,
+                      size: 23,
+                    ),
+                    Text(
+                      'Dodaj wydarzenie/incydent',
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       ),
     );
   }
 }
+

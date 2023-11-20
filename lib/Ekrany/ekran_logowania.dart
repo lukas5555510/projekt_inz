@@ -68,7 +68,7 @@ class _LogInScreenState extends State<LogInScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const MapSample(),
+                          builder: (context) => const MapScreen(),
                         ),
                       );
                     } else {

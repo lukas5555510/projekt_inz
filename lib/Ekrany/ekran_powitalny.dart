@@ -45,7 +45,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       // Logowanie się powiodło, przekieruj na ekran MapSample
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (context) => const MapSample(),
+                          builder: (context) => const MapScreen(),
                         ),
                       );
                     } else {

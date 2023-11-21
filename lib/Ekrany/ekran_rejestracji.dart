@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:inzynierka/Ekrany/ekran_weryfikacji_maila.dart';
+import 'package:inzynierka/Features/functions.dart';
 import 'package:inzynierka/Reusable_widgets/reusable_widget.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -23,20 +25,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          "Zarejestruj się",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        title: const Row(
+          children: [
+            // Dodaj ikonkę przed tytułem
+            Icon(Icons.app_registration, color: Colors.white),
+            SizedBox(width: 8), // Odstęp pomiędzy ikonką a tytułem
+            Text(
+              "Zarejestruj się",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        decoration: const BoxDecoration(color: Colors.blueGrey),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue, Colors.black],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+          ),
+        ),
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).size.height * 0.2, 20, 0),
             child: Column(
               children: <Widget>[
+                const Icon(FontAwesomeIcons.solidCircleUser, color: Colors.white, size: 180),
                 const SizedBox(height: 20,),
                 reusableTextField("Wpisz imię", Icons.person_outline, false, _userNameTextController),
                 const SizedBox(height: 20,),
@@ -69,12 +85,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         // Dodaj inne dane użytkownika, jeśli są dostępne
                       });
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => VerifyImagePage(), // Użyj ekranu weryfikacji e-maila
-                        ),
-                      );
+                      navigateToScreen(context, VerifyImagePage());
                     }
                   } on FirebaseAuthException catch (e) {
                     print("Błąd rejestracji: $e");

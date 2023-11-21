@@ -9,7 +9,7 @@ import 'package:inzynierka/Ekrany/ekran_ustawie%C5%84.dart';
 import 'package:location/location.dart';
 import 'ekran_dodawania_wydarzenia.dart';
 import 'package:image/image.dart' as img;
-import 'package:page_transition/page_transition.dart';
+import 'package:inzynierka/Features/functions.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -293,15 +293,6 @@ class MapScreenState extends State<MapScreen> {
     }
   }
 
-  void _navigateToScreen(BuildContext context, Widget screen) {
-    Navigator.push(
-      context,
-      PageTransition(
-        type: PageTransitionType.fade, // Możesz dostosować animację według potrzeb
-        child: screen,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -320,21 +311,21 @@ class MapScreenState extends State<MapScreen> {
               icon: Icons.map,
               text: "Mapa",
               onPressed: () {
-                    _navigateToScreen(context, const MapScreen());
+                    navigateToScreen(context, const MapScreen());
               },
             ),
             GButton(
               icon: Icons.person,
               text: "Profil",
               onPressed: () {
-                _navigateToScreen(context, const ProfileScreen());
+                navigateToScreen(context, const ProfileScreen());
               },
             ),
             GButton(
               icon: Icons.settings,
               text: "Ustawienia",
               onPressed: () {
-                _navigateToScreen(context, const SettingsScreen());
+                navigateToScreen(context, const SettingsScreen());
               },
             ),
           ],

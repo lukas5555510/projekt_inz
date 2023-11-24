@@ -3,9 +3,11 @@ import 'dart:io';
 class IncidentModel{
   final String title;
   final String snippet;
-  final File? imageFile;
-  final String? eventType;
-  final DateTime? eventDate;
+  final String imageFile;
+  final String eventType;
+  final String eventDate;
+  final String location;
+  final String? authorId;
 
   const IncidentModel({
     required this.title,
@@ -13,15 +15,19 @@ class IncidentModel{
     required this.imageFile,
     required this.eventType,
     required this.eventDate,
+    required this.location,
+    required this.authorId,
   });
 
   toJSON(){
     return {
-      "Title": title,
-      "Snippet": snippet,
-      "ImageFile": title,
-      "EventType": eventType,
-      "EventDate": eventDate,
+      "title": title,
+      "snippet": snippet,
+      "imageFile": title,
+      "eventType": eventType,
+      "eventDate": eventDate,
+      "location": location,
+      "authorId": authorId,
     };
   }
 }

@@ -1,10 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:inzynierka/Ekrany/controllers/event_controller.dart';
+import 'package:inzynierka/Ekrany/controllers/incident_controller.dart';
 import 'package:inzynierka/Ekrany/models/event_model.dart';
+import 'package:inzynierka/Ekrany/models/incident_model.dart';
+import 'package:inzynierka/Ekrany/repository/event_repository.dart';
+//import 'package:inzynierka/Ekrany/repository/event_repository.dart';
 import 'package:location/location.dart';
 import 'ekran_dodawania_wydarzenia.dart';
 import 'package:image/image.dart' as img;
@@ -324,12 +329,31 @@ class MapSampleState extends State<MapSample> {
                             if (eventType== 'Wydarzenie' && eventEnd != null) {
 
                               //dodanie do bazy danych wydarzenia
-                              EventModel event_model = new EventModel(title: title, snippet: snippet, imageFile: imageFile.toString(), eventType: eventType, eventDate: eventDate, eventEnd: eventEnd);
-                              EventController.instance.createEvent(event_model, latLng);
+                              EventModel event_model = EventModel(
+                                  title: title,
+                                  snippet: snippet,
+                                  imageFile: imageFile.toString(),
+                                  eventType: eventType.toString(),
+                                  location: latLng.toString(),
+                                  eventDate: eventDate.toString(),
+                                  eventEnd: eventEnd.toString(),
+                                  authorId: FirebaseAuth.instance.currentUser?.uid.toString(),
+                              );
+                              EventController.instance.createEvent(event_model);
                               // Dodaj wydarzenie z datą zakończenia
                               _addImageMarker(latLng, title, snippet, eventDate!, eventEnd);
                             } else if(eventType == "Incydent") {
                               // Dodaj incydent (bez daty zakończenia)
+                              IncidentModel incident_model = IncidentModel(
+                                  title: title,
+                                  snippet: snippet,
+                                  imageFile: imageFile.toString(),
+                                  eventType: eventType.toString(),
+                                  eventDate: eventDate.toString(),
+                                  location: latLng.toString(),
+                                  authorId: FirebaseAuth.instance.currentUser?.uid.toString(),
+                              );
+                              IncidentController.instance.createIncident(incident_model);
                               _addImageMarkerIncident(latLng, title, snippet, eventDate!);
                             }
                           }
@@ -373,6 +397,8 @@ class MapSampleState extends State<MapSample> {
           onPressed: () {
             setState(() {
               isAddingMarker = false; // Wyłącz tryb dodawania znacznika
+              EventRepository ep = EventRepository();
+              ep.pullEvents();
             });
           },
           backgroundColor: Colors.green,
@@ -404,6 +430,7 @@ class MapSampleState extends State<MapSample> {
             ],
           ),
         ),
+
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       ),
     );

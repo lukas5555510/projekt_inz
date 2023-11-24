@@ -8,9 +8,10 @@ class EventController extends GetxController{
 
   final eventRepo = Get.put(EventRepository());
 
-  Future<void> createEvent(EventModel event, LatLng latLng) async{
-    await eventRepo.createEvent(event, latLng);
+  Future<void> createEvent(EventModel event) async{
+    await eventRepo.createEvent(event);
   }
-
-
+  Future<void> pullEvents() async{
+    await eventRepo.pullEvents();
+  }
 }

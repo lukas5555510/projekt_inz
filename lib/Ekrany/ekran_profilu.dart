@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:inzynierka/Ekrany/ekran_glowny.dart';
-import 'package:inzynierka/Ekrany/ekran_logowania.dart';
+import 'package:inzynierka/Ekrany/ekran_powitalny.dart';
 import 'package:inzynierka/Ekrany/ekran_ustawie%C5%84.dart';
 import 'package:inzynierka/Features/functions.dart';
 
@@ -43,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           await FirebaseAuth.instance.signOut();
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
-                              builder: (context) => LogInScreen(),
+                              builder: (context) => const WelcomeScreen(),
                             ),
                                 (Route<dynamic> route) => false,
                           );

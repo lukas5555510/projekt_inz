@@ -3,13 +3,12 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:inzynierka/Ekrany/controllers/event_controller.dart';
 import 'package:inzynierka/Ekrany/controllers/incident_controller.dart';
 import 'package:inzynierka/Ekrany/models/event_model.dart';
 import 'package:inzynierka/Ekrany/models/incident_model.dart';
-import 'package:inzynierka/Ekrany/repository/event_repository.dart';
-//import 'package:inzynierka/Ekrany/repository/event_repository.dart';
 import 'package:location/location.dart';
 import 'ekran_dodawania_wydarzenia.dart';
 import 'package:image/image.dart' as img;
@@ -60,6 +59,7 @@ class MapSampleState extends State<MapSample> {
   File? selectedImageFile; // Przechowuje wybrany obraz
   Map<LatLng, EventDetails> eventDetailsMap = {};
   Map<LatLng, EventDetailsIncident> eventDetailsMapIncident = {};
+  final eventController = Get.put(EventController());
 
 
   static const CameraPosition _kLake = CameraPosition(
@@ -202,9 +202,10 @@ class MapSampleState extends State<MapSample> {
       String title,
       String snippet,
       DateTime eventDate,
-      DateTime eventEnd
+      DateTime eventEnd,
+      File? image
       ) async {
-    var selectedImageFile = this.selectedImageFile;
+    var selectedImageFile = image;
     if (selectedImageFile != null) {
       final img.Image originalImage = img.decodeImage(selectedImageFile.readAsBytesSync())!;
 
@@ -227,6 +228,7 @@ class MapSampleState extends State<MapSample> {
 
       setState(() {
         markers.add(
+
           Marker(
             markerId: MarkerId(markers.length.toString()),
             position: location,
@@ -301,138 +303,176 @@ class MapSampleState extends State<MapSample> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Stack(
-          children: [
-            GoogleMap(
-              mapType: MapType.normal,
-              initialCameraPosition: _kGooglePlex ?? _kLake,
-              myLocationButtonEnabled: true,
-              padding: const EdgeInsets.only(top: 28, right: 0),
-              myLocationEnabled: true,
-              onMapCreated: (GoogleMapController controller) {
-                _controller.complete(controller);
-              },
-              markers: Set<Marker>.from(markers),
-              zoomControlsEnabled: false,
-              minMaxZoomPreference: const MinMaxZoomPreference(14.0, 19.0),
-              onTap: (LatLng latLng) {
-                if (isAddingMarker) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MarkerDetailsScreen(
-                        onMarkerSaved: (title, snippet, imageFile, eventType, eventDate, eventEnd) {
-                          if (title.isNotEmpty && snippet.isNotEmpty && imageFile != null) {
-                            selectedImageFile = imageFile;
-                            if (eventType== 'Wydarzenie' && eventEnd != null) {
 
-                              //dodanie do bazy danych wydarzenia
-                              EventModel event_model = EventModel(
-                                  title: title,
-                                  snippet: snippet,
-                                  imageFile: imageFile.toString(),
-                                  eventType: eventType.toString(),
-                                  location: latLng.toString(),
-                                  eventDate: eventDate.toString(),
-                                  eventEnd: eventEnd.toString(),
-                                  authorId: FirebaseAuth.instance.currentUser?.uid.toString(),
-                              );
-                              EventController.instance.createEvent(event_model);
-                              // Dodaj wydarzenie z datą zakończenia
-                              _addImageMarker(latLng, title, snippet, eventDate!, eventEnd);
-                            } else if(eventType == "Incydent") {
-                              // Dodaj incydent (bez daty zakończenia)
-                              IncidentModel incident_model = IncidentModel(
-                                  title: title,
-                                  snippet: snippet,
-                                  imageFile: imageFile.toString(),
-                                  eventType: eventType.toString(),
-                                  eventDate: eventDate.toString(),
-                                  location: latLng.toString(),
-                                  authorId: FirebaseAuth.instance.currentUser?.uid.toString(),
-                              );
-                              IncidentController.instance.createIncident(incident_model);
-                              _addImageMarkerIncident(latLng, title, snippet, eventDate!);
-                            }
-                          }
-                        },
-                        onMarkerCancelled: () {
-                          setState(() {
-                            isAddingMarker = false;
-                          });
-                        },
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
+    return FutureBuilder(
+      future: eventController.pullEvents(),
+      builder: (context,snapshot) {
+        //=============================
+        if(snapshot.hasError){
+          final error = snapshot.error;
+          return Text('$error');
+        }
+        else if(snapshot.hasData) {
+          Map<String, EventModel> mapa = snapshot.data;
+          mapa.forEach((key, value) {
+            _addImageMarker(
+                eventController.stringToLatLng(value.location),
+                value.title,
+                value.snippet,
+                DateTime.parse(value.eventDate),
+                DateTime.parse(value.eventEnd),
+                File('/data/user/0/com.marcin.inzynierka/cache/temp_image_Koncert.jpg'));
+          });
+          return SafeArea(
+            child: Scaffold(
+              body: Stack(
+                children: [
+                  GoogleMap(
+                    mapType: MapType.normal,
+                    initialCameraPosition: _kGooglePlex ?? _kLake,
+                    myLocationButtonEnabled: true,
+                    padding: const EdgeInsets.only(top: 28, right: 0),
+                    myLocationEnabled: true,
+                    onMapCreated: (GoogleMapController controller) {
+                      _controller.complete(controller);
+                    },
+                    markers: Set<Marker>.from(markers),
+                    zoomControlsEnabled: false,
+                    minMaxZoomPreference: const MinMaxZoomPreference(
+                        14.0, 19.0),
+                    onTap: (LatLng latLng) {
+                      if (isAddingMarker) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                MarkerDetailsScreen(
 
-            if (isAddingMarker)
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  color: Colors.blue.withOpacity(0.8),
-                  padding: const EdgeInsets.all(10),
-                  child: const Center(
-                    child: Text(
-                      'Kliknij na mapę, aby wybrać miejsce wydarzenia/incydentu',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                                  onMarkerSaved: (title, snippet, imageFile,
+                                      eventType, eventDate, eventEnd) {
+
+                                    if (title.isNotEmpty &&
+                                        snippet.isNotEmpty &&
+                                        imageFile != null) {
+                                      selectedImageFile = imageFile;
+                                      if (eventType == 'Wydarzenie' &&
+                                          eventEnd != null) {
+                                        //dodanie do bazy danych wydarzenia
+                                        EventModel event_model = EventModel(
+                                          title: title,
+                                          snippet: snippet,
+                                          imageFile: imageFile.path,
+                                          eventType: eventType.toString(),
+                                          location: latLng.toString(),
+                                          eventDate: eventDate.toString(),
+                                          eventEnd: eventEnd.toString(),
+                                          authorId: FirebaseAuth.instance
+                                              .currentUser?.uid.toString(),
+                                        );
+                                        EventController.instance.createEvent(event_model);
+                                        // Dodaj wydarzenie z datą zakończenia
+
+                                      } else if (eventType == "Incydent") {
+                                        // Dodaj incydent (bez daty zakończenia)
+                                        IncidentModel incident_model = IncidentModel(
+                                          title: title,
+                                          snippet: snippet,
+                                          imageFile: imageFile.toString(),
+                                          eventType: eventType.toString(),
+                                          eventDate: eventDate.toString(),
+                                          location: latLng.toString(),
+                                          authorId: FirebaseAuth.instance
+                                              .currentUser?.uid.toString(),
+                                        );
+                                        IncidentController.instance
+                                            .createIncident(incident_model);
+                                        _addImageMarkerIncident(
+                                            latLng, title, snippet, eventDate!);
+                                      }
+                                    }
+                                  },
+                                  onMarkerCancelled: () {
+                                    setState(() {
+                                      isAddingMarker = false;
+                                    });
+                                  },
+                                ),
+                          ),
+                        );
+                      }
+                    },
                   ),
-                ),
-              ),
-          ],
-        ),
-        floatingActionButton: isAddingMarker
-            ? FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              isAddingMarker = false; // Wyłącz tryb dodawania znacznika
-              EventRepository ep = EventRepository();
-              ep.pullEvents();
-            });
-          },
-          backgroundColor: Colors.green,
-          child: const Icon(Icons.close),
-        )
-            : ElevatedButton(
-          onPressed: () {
-            setState(() {
-              isAddingMarker = true; // Włącz tryb dodawania znacznika
-            });
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            padding: const EdgeInsets.all(5),
-          ),
-          child: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.add_circle,
-                size: 23,
-              ),
-              Text(
-                'Dodaj wydarzenie/incydent',
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
-            ],
-          ),
-        ),
 
-        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      ),
+                  if (isAddingMarker)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        color: Colors.blue.withOpacity(0.8),
+                        padding: const EdgeInsets.all(10),
+                        child: const Center(
+                          child: Text(
+                            'Kliknij na mapę, aby wybrać miejsce wydarzenia/incydentu',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              floatingActionButton: isAddingMarker
+                  ? FloatingActionButton(
+                onPressed: () {
+                  setState(() {
+                    isAddingMarker = false; // Wyłącz tryb dodawania znacznika
+                  });
+                },
+                backgroundColor: Colors.green,
+                child: const Icon(Icons.close),
+              )
+                  : ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    isAddingMarker = true; // Włącz tryb dodawania znacznika
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.all(5),
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.add_circle,
+                      size: 23,
+                    ),
+                    Text(
+                      'Dodaj wydarzenie/incydent',
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              floatingActionButtonLocation: FloatingActionButtonLocation
+                  .startFloat,
+            ),
+          );
+          //================
+        }else
+          {
+            return const CircularProgressIndicator();
+          }
+      }
     );
+    //future======
   }
 }

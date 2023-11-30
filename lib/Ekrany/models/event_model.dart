@@ -1,3 +1,4 @@
+
 class EventModel{
   final String title;
   final String snippet;
@@ -30,17 +31,6 @@ class EventModel{
       "eventEnd": eventEnd,
       "authorId":authorId
     };
-  }
-  static EventModel fromMap(Map<String,dynamic> map){
-return EventModel(
-    title: map['title'],
-    snippet: map['snippet'],
-    imageFile: map['imageFile'],
-    eventType: map['eventType'],
-    location: map['location'],
-    eventDate: map['eventDate'],
-    eventEnd: map['eventEnd'],
-    authorId: map['authorId']);
   }
 
 

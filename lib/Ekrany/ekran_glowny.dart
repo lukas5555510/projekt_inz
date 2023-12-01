@@ -1,15 +1,20 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:inzynierka/Ekrany/ekran_profilu.dart';
 import 'package:inzynierka/Ekrany/ekran_ustawie%C5%84.dart';
 import 'package:location/location.dart';
+import 'controllers/event_controller.dart';
 import 'ekran_dodawania_wydarzenia.dart';
 import 'package:image/image.dart' as img;
 import 'package:inzynierka/Features/functions.dart';
+
+import 'models/event_model.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -48,6 +53,7 @@ class MapScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
   LatLng? _latLng;
+  final eventController = Get.put(EventController());
   CameraPosition? _kGooglePlex;
   List<Marker> markers = [];
   String? markerTitle;
@@ -195,8 +201,8 @@ class MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _addImageMarker(LatLng location, String title, String snippet,
-      DateTime eventDate, DateTime eventEnd) async {
-    var selectedImageFile = this.selectedImageFile;
+      DateTime eventDate, DateTime eventEnd, File? image) async {
+    var selectedImageFile = image;
     if (selectedImageFile != null) {
       final img.Image originalImage =
           img.decodeImage(selectedImageFile.readAsBytesSync())!;
@@ -293,7 +299,6 @@ class MapScreenState extends State<MapScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -311,7 +316,7 @@ class MapScreenState extends State<MapScreen> {
               icon: Icons.map,
               text: "Mapa",
               onPressed: () {
-                    navigateToScreen(context, const MapScreen());
+                navigateToScreen(context, const MapScreen());
               },
             ),
             GButton(
@@ -322,62 +327,108 @@ class MapScreenState extends State<MapScreen> {
               },
             ),
             GButton(
-              icon: Icons.settings,
-              text: "Ustawienia",
+              icon: Icons.add_circle,
+              text: "Dodaj wydarzenie/incydent",
               onPressed: () {
-                navigateToScreen(context, const SettingsScreen());
+                isAddingMarker = true;
               },
             ),
           ],
         ),
         body: Stack(
           children: [
-            GoogleMap(
-              mapType: MapType.normal,
-              initialCameraPosition: _kGooglePlex ?? _kLake,
-              myLocationButtonEnabled: true,
-              padding: const EdgeInsets.only(top: 28, right: 0),
-              myLocationEnabled: true,
-              onMapCreated: (GoogleMapController controller) {
-                _controller.complete(controller);
-              },
-              markers: Set<Marker>.from(markers),
-              zoomControlsEnabled: false,
-              minMaxZoomPreference: const MinMaxZoomPreference(14.0, 19.0),
-              onTap: (LatLng latLng) {
-                if (isAddingMarker) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MarkerDetailsScreen(
-                        onMarkerSaved: (title, snippet, imageFile, eventType,
-                            eventDate, eventEnd) {
-                          if (title.isNotEmpty &&
-                              snippet.isNotEmpty &&
-                              imageFile != null) {
-                            selectedImageFile = imageFile;
-                            if (eventType == 'Wydarzenie' && eventEnd != null) {
-                              // Dodaj wydarzenie z datą zakończenia
-                              _addImageMarker(
-                                  latLng, title, snippet, eventDate!, eventEnd);
-                            } else {
-                              // Dodaj incydent (bez daty zakończenia)
-                              _addImageMarkerIncident(
-                                  latLng, title, snippet, eventDate!);
-                            }
-                          }
-                        },
-                        onMarkerCancelled: () {
-                          setState(() {
-                            isAddingMarker = false;
-                          });
-                        },
-                      ),
+           GoogleMap(
+                      mapType: MapType.normal,
+                      initialCameraPosition: _kGooglePlex ?? _kLake,
+                      myLocationButtonEnabled: true,
+                      padding: const EdgeInsets.only(top: 28, right: 0),
+                      myLocationEnabled: true,
+                      onMapCreated: (GoogleMapController controller) {
+                        _controller.complete(controller);
+                      },
+                      markers: Set<Marker>.from(markers),
+                      zoomControlsEnabled: false,
+                      minMaxZoomPreference:
+                          const MinMaxZoomPreference(14.0, 19.0),
+                      onTap: (LatLng latLng) {
+                        if (isAddingMarker) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FutureBuilder(
+                                  future: eventController.pullEvents(),
+                                  builder: (context, snapshot) {
+                                    //=============================
+                                    if (snapshot.hasError) {
+                                      final error = snapshot.error;
+                                      return Text('$error');
+                                    } else if (snapshot.hasData) {
+                                      Map<String, EventModel> mapa =
+                                          snapshot.data;
+                                      mapa.forEach((key, value) {
+                                        _addImageMarker(
+                                            eventController
+                                                .stringToLatLng(value.location),
+                                            value.title,
+                                            value.snippet,
+                                            DateTime.parse(value.eventDate),
+                                            DateTime.parse(value.eventEnd),
+                                            File(value.imageFile));
+                                      });
+                                      return MarkerDetailsScreen(
+                                        onMarkerSaved: (title,
+                                            snippet,
+                                            imageFile,
+                                            eventType,
+                                            eventDate,
+                                            eventEnd) {
+                                          if (title.isNotEmpty &&
+                                              snippet.isNotEmpty &&
+                                              imageFile != null) {
+                                            selectedImageFile = imageFile;
+                                            if (eventType == 'Wydarzenie' &&
+                                                eventEnd != null) {
+                                              // Dodaj wydarzenie z datą zakończenia
+                                              EventModel event_model = EventModel(
+                                                title: title,
+                                                snippet: snippet,
+                                                imageFile: imageFile.path,
+                                                eventType: eventType.toString(),
+                                                location: latLng.toString(),
+                                                eventDate: eventDate.toString(),
+                                                eventEnd: eventEnd.toString(),
+                                                authorId: FirebaseAuth.instance
+                                                    .currentUser?.uid.toString(),
+                                              );
+                                              EventController.instance.createEvent(event_model);
+                                              _addImageMarker(latLng, title, snippet, eventDate!, eventEnd,imageFile);
+
+                                            } else {
+                                              // Dodaj incydent (bez daty zakończenia)
+                                              _addImageMarkerIncident(latLng,
+                                                  title, snippet, eventDate!);
+                                            }
+                                          }
+                                        },
+                                        onMarkerCancelled: () {
+                                          //setState(() {
+                                          isAddingMarker = false;
+                                          //});
+                                        },
+                                      );
+                                    } else {
+                                      return Center(
+                                          child:
+                                              const CircularProgressIndicator());
+                                    }
+                                  }),
+                            ),
+                          );
+                        }
+                      },
                     ),
-                  );
-                }
-              },
-            ),
+
+            //=====
             if (isAddingMarker)
               Positioned(
                 top: 0,
@@ -441,4 +492,3 @@ class MapScreenState extends State<MapScreen> {
     );
   }
 }
-

@@ -70,10 +70,45 @@ class MapScreenState extends State<MapScreen> {
     zoom: 19.151926040649414,
   );
 
+  Future<void> loadEventsFromDatabase() async {
+    try {
+      final events = await eventController.pullEvents();
+      markers.clear();
+      eventDetailsMap.clear();
+      eventDetailsMapIncident.clear();
+
+      events.forEach((key, value) {
+        final location = eventController.stringToLatLng(value.location);
+        if (value.eventType == 'Wydarzenie' && value.eventEnd != null) {
+          _addImageMarker(
+            location,
+            value.title,
+            value.snippet,
+            DateTime.parse(value.eventDate),
+            DateTime.parse(value.eventEnd!),
+            File(value.imageFile),
+          );
+        } else if (value.eventType == 'Incydent') {
+          _addImageMarkerIncident(
+            location,
+            value.title,
+            value.snippet,
+            DateTime.parse(value.eventDate),
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      });
+    } catch (e) {
+      print('Error loading events: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     getCurrentLocation();
+    loadEventsFromDatabase();
   }
 
   Future<void> getCurrentLocation() async {
@@ -326,107 +361,75 @@ class MapScreenState extends State<MapScreen> {
                 navigateToScreen(context, const ProfileScreen());
               },
             ),
-            GButton(
-              icon: Icons.add_circle,
-              text: "Dodaj wydarzenie/incydent",
-              onPressed: () {
-                isAddingMarker = true;
-              },
-            ),
           ],
         ),
         body: Stack(
           children: [
-           GoogleMap(
-                      mapType: MapType.normal,
-                      initialCameraPosition: _kGooglePlex ?? _kLake,
-                      myLocationButtonEnabled: true,
-                      padding: const EdgeInsets.only(top: 28, right: 0),
-                      myLocationEnabled: true,
-                      onMapCreated: (GoogleMapController controller) {
-                        _controller.complete(controller);
-                      },
-                      markers: Set<Marker>.from(markers),
-                      zoomControlsEnabled: false,
-                      minMaxZoomPreference:
-                          const MinMaxZoomPreference(14.0, 19.0),
-                      onTap: (LatLng latLng) {
-                        if (isAddingMarker) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FutureBuilder(
-                                  future: eventController.pullEvents(),
-                                  builder: (context, snapshot) {
-                                    //=============================
-                                    if (snapshot.hasError) {
-                                      final error = snapshot.error;
-                                      return Text('$error');
-                                    } else if (snapshot.hasData) {
-                                      Map<String, EventModel> mapa =
-                                          snapshot.data;
-                                      mapa.forEach((key, value) {
-                                        _addImageMarker(
-                                            eventController
-                                                .stringToLatLng(value.location),
-                                            value.title,
-                                            value.snippet,
-                                            DateTime.parse(value.eventDate),
-                                            DateTime.parse(value.eventEnd),
-                                            File(value.imageFile));
-                                      });
-                                      return MarkerDetailsScreen(
-                                        onMarkerSaved: (title,
-                                            snippet,
-                                            imageFile,
-                                            eventType,
-                                            eventDate,
-                                            eventEnd) {
-                                          if (title.isNotEmpty &&
-                                              snippet.isNotEmpty &&
-                                              imageFile != null) {
-                                            selectedImageFile = imageFile;
-                                            if (eventType == 'Wydarzenie' &&
-                                                eventEnd != null) {
-                                              // Dodaj wydarzenie z datą zakończenia
-                                              EventModel event_model = EventModel(
-                                                title: title,
-                                                snippet: snippet,
-                                                imageFile: imageFile.path,
-                                                eventType: eventType.toString(),
-                                                location: latLng.toString(),
-                                                eventDate: eventDate.toString(),
-                                                eventEnd: eventEnd.toString(),
-                                                authorId: FirebaseAuth.instance
-                                                    .currentUser?.uid.toString(),
-                                              );
-                                              EventController.instance.createEvent(event_model);
-                                              _addImageMarker(latLng, title, snippet, eventDate!, eventEnd,imageFile);
-
-                                            } else {
-                                              // Dodaj incydent (bez daty zakończenia)
-                                              _addImageMarkerIncident(latLng,
-                                                  title, snippet, eventDate!);
-                                            }
-                                          }
-                                        },
-                                        onMarkerCancelled: () {
-                                          //setState(() {
-                                          isAddingMarker = false;
-                                          //});
-                                        },
-                                      );
-                                    } else {
-                                      return Center(
-                                          child:
-                                              const CircularProgressIndicator());
-                                    }
-                                  }),
-                            ),
-                          );
-                        }
-                      },
+            GoogleMap(
+              mapType: MapType.normal,
+              initialCameraPosition: _kGooglePlex ?? _kLake,
+              myLocationButtonEnabled: true,
+              padding: const EdgeInsets.only(top: 28, right: 0),
+              myLocationEnabled: true,
+              onMapCreated: (GoogleMapController controller) {
+                _controller.complete(controller);
+              },
+              markers: Set<Marker>.from(markers),
+              zoomControlsEnabled: false,
+              minMaxZoomPreference: const MinMaxZoomPreference(14.0, 19.0),
+              onTap: (LatLng latLng) {
+                if (isAddingMarker) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FutureBuilder(
+                          future: eventController.pullEvents(),
+                          builder: (context, snapshot) {
+                            return MarkerDetailsScreen(
+                              onMarkerSaved: (title, snippet, imageFile,
+                                  eventType, eventDate, eventEnd) {
+                                if (title.isNotEmpty &&
+                                    snippet.isNotEmpty &&
+                                    imageFile != null) {
+                                  selectedImageFile = imageFile;
+                                  if (eventType == 'Wydarzenie' &&
+                                      eventEnd != null) {
+                                    // Dodaj wydarzenie z datą zakończenia
+                                    EventModel event_model = EventModel(
+                                      title: title,
+                                      snippet: snippet,
+                                      imageFile: imageFile.path,
+                                      eventType: eventType.toString(),
+                                      location: latLng.toString(),
+                                      eventDate: eventDate.toString(),
+                                      eventEnd: eventEnd.toString(),
+                                      authorId: FirebaseAuth
+                                          .instance.currentUser?.uid
+                                          .toString(),
+                                    );
+                                    EventController.instance
+                                        .createEvent(event_model);
+                                    _addImageMarker(latLng, title, snippet,
+                                        eventDate!, eventEnd, imageFile);
+                                  } else {
+                                    // Dodaj incydent (bez daty zakończenia)
+                                    _addImageMarkerIncident(
+                                        latLng, title, snippet, eventDate!);
+                                  }
+                                }
+                              },
+                              onMarkerCancelled: () {
+                                //setState(() {
+                                isAddingMarker = false;
+                                //});
+                              },
+                            );
+                          }),
                     ),
+                  );
+                }
+              },
+            ),
 
             //=====
             if (isAddingMarker)

@@ -1,4 +1,6 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -19,6 +21,8 @@ class AuthService {
 
         final UserCredential authResult = await _auth.signInWithCredential(credential);
         final User? user = authResult.user;
+
+
 
         if (user != null) {
           // Zapisz użytkownika do kolekcji "users" w bazie danych

@@ -10,8 +10,7 @@ import 'package:inzynierka/Reusable_widgets/reusable_widget.dart';
 
 class MarkerDetailsScreen extends StatefulWidget {
   final void Function(String title, String snippet, File? imageFile,
-          String? eventType, DateTime? eventDate, DateTime? eventEnd)
-      onMarkerSaved;
+      String? eventType, DateTime? eventDate, DateTime? eventEnd) onMarkerSaved;
 
   const MarkerDetailsScreen({
     required this.onMarkerSaved,
@@ -90,6 +89,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
               controller: dateController,
               decoration: const InputDecoration(
                 labelText: 'Data i godzina rozpoczęcia wydarzenia',
+                labelStyle: TextStyle(color: Colors.white),
                 prefixIcon: Icon(Icons.date_range),
               ),
               enabled: false,
@@ -138,6 +138,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
               controller: endDateController,
               decoration: const InputDecoration(
                 labelText: 'Data i godzina zakończenia wydarzenia',
+                labelStyle: TextStyle(color: Colors.white),
                 prefixIcon: Icon(Icons.date_range),
               ),
               enabled: false,
@@ -185,7 +186,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
           items: events.map((String value) {
             return DropdownMenuItem<String>(
               value: value,
-              child: Text(value),
+              child: Text(value, style: TextStyle(color: Colors.black)),
             );
           }).toList(),
           onChanged: (selected) {
@@ -194,7 +195,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
               _loadEventImage(selected!);
             });
           },
-          hint: Text('Wybierz wydarzenie'),
+          hint: const Text('Wybierz wydarzenie', style: TextStyle(color: Colors.white)),
         ),
       ],
     );
@@ -208,8 +209,9 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
             Expanded(
               child: TextField(
                 controller: dateController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Data incydentu',
+                  labelStyle: TextStyle(color: Colors.white),
                   prefixIcon: Icon(Icons.date_range),
                 ),
                 enabled: false,
@@ -258,7 +260,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
           items: incidents.map((String value) {
             return DropdownMenuItem<String>(
               value: value,
-              child: Text(value),
+              child: Text(value, style: TextStyle(color: Colors.black)),
             );
           }).toList(),
           onChanged: (selected) {
@@ -267,7 +269,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
               _loadEventImage(selected!); // Zaktualizuj obraz dla incydentu
             });
           },
-          hint: Text('Wybierz incydent'),
+          hint: Text('Wybierz incydent', style: TextStyle(color: Colors.white)),
         ),
       ],
     );
@@ -276,72 +278,85 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueGrey,
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: const Text('Szczegóły wydarzenia',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Szczegóły wydarzenia',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 10,
-            ),
-            reusableTextField(
-                'Tytuł wydarzenia', Icons.title, false, titleController),
-            const SizedBox(
-              height: 20,
-            ),
-            reusableTextField(
-                'Opis wydarzenia', Icons.description, false, snippetController),
-            const SizedBox(
-              height: 10,
-            ),
-            if (imageFile != null)
-              Image.file(imageFile!, width: 150, height: 150),
-            const SizedBox(
-              height: 10,
-            ),
-            DropdownButton<String>(
-              value: eventType,
-              items: ["Wydarzenie", "Incydent"].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (selectedEventType) {
-                setState(() {
-                  eventType = selectedEventType;
-                  selectedEvent = null;
-                  showDateField = true;
-                });
-              },
-              hint: Text('Wybierz rodzaj zdarzenia'),
-            ),
-            if (showDateField)
-              eventType == 'Wydarzenie'
-                  ? _buildEventFields()
-                  : _buildIncidentFields(),
-            ElevatedButton(
-              onPressed: () {
-                title = titleController.text;
-                snippet = snippetController.text;
-                if (title.isEmpty) {
-                  _showSnackbar(context, 'Wprowadź tytuł wydarzenia/incydentu');
-                } else if (snippet.isEmpty) {
-                  _showSnackbar(context, 'Wprowadź opis wydarzenia/incydentu');
-                } else if (eventType == null) {
-                  _showSnackbar(context, 'Wybierz rodzaj zdarzenia');
-                } else if (eventDate == null) {
-                  _showSnackbar(context, 'Wybierz datę wydarzenia/incydentu');
-                } else if (selectedEvent == null) {
-                  _showSnackbar(context, 'Wybierz wydarzenie lub incydent');
-                } else {
-                    widget.onMarkerSaved(title, snippet, imageFile,
-                        eventType, eventDate, eventEnd); // Przekaż endDate
+      body: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue, Colors.black],
+            begin: Alignment.bottomLeft,
+            end: Alignment.topLeft,
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 10,
+              ),
+              reusableTextField(
+                  'Tytuł wydarzenia', Icons.title, false, titleController),
+              const SizedBox(
+                height: 20,
+              ),
+              reusableTextField('Opis wydarzenia', Icons.description, false,
+                  snippetController),
+              const SizedBox(
+                height: 10,
+              ),
+              if (imageFile != null)
+                Image.file(imageFile!, width: 150, height: 150),
+              const SizedBox(
+                height: 10,
+              ),
+              DropdownButton<String>(
+                value: eventType,
+                items: ["Wydarzenie", "Incydent"].map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: const TextStyle(color: Colors.black)),
+                  );
+                }).toList(),
+                onChanged: (selectedEventType) {
+                  setState(() {
+                    eventType = selectedEventType;
+                    selectedEvent = null;
+                    showDateField = true;
+                  });
+                },
+                hint: Text('Wybierz rodzaj zdarzenia', style: TextStyle(color: Colors.white)),
+              ),
+              if (showDateField)
+                eventType == 'Wydarzenie'
+                    ? _buildEventFields()
+                    : _buildIncidentFields(),
+              ElevatedButton(
+                onPressed: () {
+                  title = titleController.text;
+                  snippet = snippetController.text;
+                  if (title.isEmpty) {
+                    _showSnackbar(
+                        context, 'Wprowadź tytuł wydarzenia/incydentu');
+                  } else if (snippet.isEmpty) {
+                    _showSnackbar(
+                        context, 'Wprowadź opis wydarzenia/incydentu');
+                  } else if (eventType == null) {
+                    _showSnackbar(context, 'Wybierz rodzaj zdarzenia');
+                  } else if (eventDate == null) {
+                    _showSnackbar(context, 'Wybierz datę wydarzenia/incydentu');
+                  } else if (selectedEvent == null) {
+                    _showSnackbar(context, 'Wybierz wydarzenie lub incydent');
+                  } else {
+                    widget.onMarkerSaved(title, snippet, imageFile, eventType,
+                        eventDate, eventEnd); // Przekaż endDate
                     Navigator.pop(context, {
                       'title': title,
                       'snippet': snippet,
@@ -350,18 +365,18 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                       'eventDate': eventDate,
                       'endDate': eventEnd, // Przekaż endDate
                     });
-
-                }
-              },
-              child: const Text('Zapisz wydarzenie/incydent'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                                Navigator.pop(context);
-              },
-              child: const Text('Anuluj'),
-            )
-          ],
+                  }
+                },
+                child: const Text('Zapisz wydarzenie/incydent'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Anuluj'),
+              )
+            ],
+          ),
         ),
       ),
     );

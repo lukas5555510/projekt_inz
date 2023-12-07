@@ -60,6 +60,12 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
   final Map<String, String> eventImages = {
     "Koncert": 'lib/images/koncert.png',
     "Kradzież": 'lib/images/kradzież.jpg',
+    "Wystawa": 'lib/images/wystawa.png',
+    "Festyn": 'lib/images/festyn.png',
+    "Zlot społeczności": 'lib/images/zlot.png',
+    "Wypadek": 'lib/images/wypadek.png',
+    "Dzikie zwierzęta": 'lib/images/dzikie_zwierzeta.png',
+    "Bezpańskie zwierzęta": 'lib/images/bezpanskie_zwierzeta.png',
   };
 
   Future<void> _loadEventImage(String eventType) async {

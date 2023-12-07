@@ -15,18 +15,6 @@ class EventController extends GetxController{
   }
   Future pullEvents() async{
     return await eventRepo.pullEvents();
-    /*
-    Map<String, EventModel>data = eventRepo.pullEvents();
-    if(data.isNotEmpty){
-      return data;
-    }else
-      {
-        print("Blad pobierania eventów z bazy");
-        return {};
-      }
-
-     */
-
   }
   LatLng stringToLatLng(String coordinatesString) {
     // Usuwanie zbędnych znaków z ciągu znaków

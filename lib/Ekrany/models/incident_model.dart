@@ -1,4 +1,3 @@
-import 'dart:io';
 
 class IncidentModel{
   final String title;
@@ -29,5 +28,16 @@ class IncidentModel{
       "location": location,
       "authorId": authorId,
     };
+  }
+
+  static IncidentModel fromMap(Map<String,dynamic> map){
+    return IncidentModel(
+        title: map['title'],
+        snippet: map['snippet'],
+        imageFile: map['imageFile'],
+        eventType: map['eventType'],
+        location: map['location'],
+        eventDate: map['eventDate'],
+        authorId: map['authorId']);
   }
 }

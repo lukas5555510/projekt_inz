@@ -182,8 +182,8 @@ class MapScreenState extends State<MapScreen> {
       final img.Image originalImage =
       img.decodeImage(selectedImageFile.readAsBytesSync())!;
 
-      const int targetWidth = 200; // Dostosuj szerokość
-      const int targetHeight = 200; // Dostosuj wysokość
+      const int targetWidth = 100; // Dostosuj szerokość
+      const int targetHeight = 100; // Dostosuj wysokość
 
       final img.Image resizedImage = img.copyResize(originalImage,
           width: targetWidth, height: targetHeight);
@@ -249,14 +249,43 @@ class MapScreenState extends State<MapScreen> {
                             .instance.currentUser?.uid
                             .toString()==eventDetailsMapIncident[location]?.authorId)
                           Center(
-                            child: FloatingActionButton(
+                            child: ElevatedButton(
                               onPressed: () {
-                                print(idIncident);
-                                IncidentController.instance.deleteIncident(idIncident);
-                                loadEventsFromDatabase();
+                                // Pokazuje alert z potwierdzeniem usunięcia
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text("Potwierdź usunięcie"),
+                                      content: Text("Czy na pewno chcesz usunąć ten incydent?"),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            // Zamknij alert i nie rób nic
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text("Nie"),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            // Zamknij alert i usuń incydent
+                                            Navigator.of(context).pop();
+                                            print(idIncident);
+                                            IncidentController.instance.deleteIncident(idIncident);
+                                            navigateToScreen(context, const MapScreen());
+                                          },
+                                          child: Text("Tak"),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
                               },
-                              backgroundColor: Colors.red,
-                              child: const Icon(Icons.close),
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Colors.red, // Kolor tekstu przycisku
+                              ),
+                              child: const Text("Usuń incydent"),
                             ),
                           ),
                       ],
@@ -362,16 +391,46 @@ class MapScreenState extends State<MapScreen> {
                         if(FirebaseAuth
                             .instance.currentUser?.uid
                             .toString()==eventDetailsMap[location]?.authorId)
-                          Center(
-                            child: FloatingActionButton(
-                              onPressed: () {
-                                EventController.instance.deleteEvent(idEvent);
-                                loadEventsFromDatabase();
-                              },
-                              backgroundColor: Colors.red,
-                              child: const Icon(Icons.close),
+                        Center(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // Pokazuje alert z potwierdzeniem usunięcia
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text("Potwierdź usunięcie"),
+                                    content: Text("Czy na pewno chcesz usunąć to wydarzenie?"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          // Zamknij alert i nie rób nic
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text("Nie"),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          // Zamknij alert i usuń event
+                                          Navigator.of(context).pop();
+                                          print(idEvent);
+                                          EventController.instance.deleteEvent(idEvent);
+                                          navigateToScreen(context, const MapScreen());
+                                        },
+                                        child: Text("Tak"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.red, // Kolor tekstu przycisku
                             ),
+                            child: const Text("Usuń wydarzenie"),
                           ),
+                        ),
                       ],
                     ),
                   );

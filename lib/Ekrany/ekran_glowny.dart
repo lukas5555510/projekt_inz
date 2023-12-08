@@ -272,7 +272,8 @@ class MapScreenState extends State<MapScreen> {
                                             Navigator.of(context).pop();
                                             print(idIncident);
                                             IncidentController.instance.deleteIncident(idIncident);
-                                            navigateToScreen(context, const MapScreen());
+                                            loadEventsFromDatabase();
+                                            Navigator.of(context).pop();
                                           },
                                           child: Text("Tak"),
                                         ),
@@ -415,7 +416,8 @@ class MapScreenState extends State<MapScreen> {
                                           Navigator.of(context).pop();
                                           print(idEvent);
                                           EventController.instance.deleteEvent(idEvent);
-                                          navigateToScreen(context, const MapScreen());
+                                          loadEventsFromDatabase();
+                                          Navigator.of(context).pop();
                                         },
                                         child: Text("Tak"),
                                       ),
@@ -495,10 +497,10 @@ class MapScreenState extends State<MapScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => /*FutureBuilder(
-                          future: eventController.pullEvents(),
+                      builder: (context) => FutureBuilder(
+                          future: loadEventsFromDatabase(),
                           builder: (context, snapshot) {
-                            return*/ MarkerDetailsScreen(
+                            return MarkerDetailsScreen(
                               onMarkerSaved: (title, snippet, imageFile,
                                   eventType, eventDate, eventEnd) {
                                 if (title.isNotEmpty &&
@@ -547,8 +549,8 @@ class MapScreenState extends State<MapScreen> {
                                 isAddingMarker = false;
                                 //});
                               },
-                            ),//;//;-od future
-                          //}),//future builder
+                            );//;-od future
+                          }),//future builder
                     ),
                   );
                 }

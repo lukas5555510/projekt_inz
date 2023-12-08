@@ -71,7 +71,6 @@ class IncidentRepository extends GetxController {
     return mapa;
   }
   deleteIncident(String id) async{
-    print("Funkcja sie wywoluje");
     final fbapp = Firebase.app();
     final rtdb = FirebaseDatabase.instanceFor(
         app: fbapp,

@@ -63,7 +63,7 @@ class EventRepository extends GetxController {
                 location: value['location'],
                 eventDate: value['eventDate'],
                 eventEnd: value['endDate'],
-                authorId: value['AuthorUId)']);
+                authorId: value['authorUid']);
 
             mapa[key] = model;
           });
@@ -73,5 +73,12 @@ class EventRepository extends GetxController {
     }
 
     return mapa;
+  }
+  deleteEvent(String id) async{
+    final fbapp = Firebase.app();
+    final rtdb = FirebaseDatabase.instanceFor(
+        app: fbapp,
+        databaseURL: 'https://inzynierka-58aab-default-rtdb.europe-west1.firebasedatabase.app/');
+    await rtdb.ref().child("RTDB").child("Events").child(id).remove().then((value)=>null);
   }
 }

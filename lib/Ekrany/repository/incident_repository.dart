@@ -59,7 +59,7 @@ class IncidentRepository extends GetxController {
                 eventType: value['eventType'],
                 location: value['location'],
                 eventDate: value['eventDate'],
-                authorId: value['AuthorUId)']);
+                authorId: value['authorUid']);
 
             mapa[key] = model;
           });
@@ -69,5 +69,13 @@ class IncidentRepository extends GetxController {
     }
 
     return mapa;
+  }
+  deleteIncident(String id) async{
+    print("Funkcja sie wywoluje");
+    final fbapp = Firebase.app();
+    final rtdb = FirebaseDatabase.instanceFor(
+        app: fbapp,
+        databaseURL: 'https://inzynierka-58aab-default-rtdb.europe-west1.firebasedatabase.app/');
+    await rtdb.ref().child("RTDB").child("Incidents").child(id).remove().then((value)=>null);
   }
 }

@@ -28,7 +28,7 @@ class EventModel{
       "location":location,
       "eventDate": eventDate,
       "eventEnd": eventEnd,
-      "authorId":authorId
+      "authorId": authorId,
     };
   }
   static EventModel fromMap(Map<String,dynamic> map){

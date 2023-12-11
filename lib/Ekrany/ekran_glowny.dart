@@ -56,7 +56,7 @@ class EventDetailsIncident {
 
 class MapScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controller =
-  Completer<GoogleMapController>();
+      Completer<GoogleMapController>();
   LatLng? _latLng;
   final eventController = Get.put(EventController());
   final incidentController = Get.put(IncidentController());
@@ -89,15 +89,14 @@ class MapScreenState extends State<MapScreen> {
         final location = eventController.stringToLatLng(value.location);
         if (value.eventType == 'Wydarzenie' && value.eventEnd != null) {
           _addImageMarker(
-            location,
-            value.title,
-            value.snippet,
-            DateTime.parse(value.eventDate),
-            DateTime.parse(value.eventEnd!),
-            File(value.imageFile),
-            value.authorId,
-            key
-          );
+              location,
+              value.title,
+              value.snippet,
+              DateTime.parse(value.eventDate),
+              DateTime.parse(value.eventEnd!),
+              File(value.imageFile),
+              value.authorId,
+              key);
         } /*else if (value.eventType == 'Incydent') {
           _addImageMarkerIncident(
             location,
@@ -109,17 +108,17 @@ class MapScreenState extends State<MapScreen> {
           return const Center(child: CircularProgressIndicator());
         }*/
       });
-      incidents.forEach((key,value){
+      incidents.forEach((key, value) {
         final location = incidentController.stringToLatLng(value.location);
-        if (value.eventType == 'Incydent'){
-          _addImageMarkerIncident(location,
-            value.title,
-            value.snippet,
-            DateTime.parse(value.eventDate),
-            File(value.imageFile),
-            value.authorId,
-            key
-          );
+        if (value.eventType == 'Incydent') {
+          _addImageMarkerIncident(
+              location,
+              value.title,
+              value.snippet,
+              DateTime.parse(value.eventDate),
+              File(value.imageFile),
+              value.authorId,
+              key);
         }
       });
     } catch (e) {
@@ -169,18 +168,18 @@ class MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _addImageMarkerIncident(
-      LatLng location,
-      String title,
-      String snippet,
-      DateTime eventDate,
-      File? image,
-      String? authorUId,
-      String idIncident,
-      ) async {
+    LatLng location,
+    String title,
+    String snippet,
+    DateTime eventDate,
+    File? image,
+    String? authorUId,
+    String idIncident,
+  ) async {
     var selectedImageFile = image;
     if (selectedImageFile != null) {
       final img.Image originalImage =
-      img.decodeImage(selectedImageFile.readAsBytesSync())!;
+          img.decodeImage(selectedImageFile.readAsBytesSync())!;
 
       const int targetWidth = 100; // Dostosuj szerokość
       const int targetHeight = 100; // Dostosuj wysokość
@@ -245,9 +244,8 @@ class MapScreenState extends State<MapScreen> {
                             ),
                           ),
                         ),
-                        if(FirebaseAuth
-                            .instance.currentUser?.uid
-                            .toString()==eventDetailsMapIncident[location]?.authorId)
+                        if (FirebaseAuth.instance.currentUser?.uid.toString() ==
+                            eventDetailsMapIncident[location]?.authorId)
                           Center(
                             child: ElevatedButton(
                               onPressed: () {
@@ -257,7 +255,8 @@ class MapScreenState extends State<MapScreen> {
                                   builder: (BuildContext context) {
                                     return AlertDialog(
                                       title: Text("Potwierdź usunięcie"),
-                                      content: Text("Czy na pewno chcesz usunąć ten incydent?"),
+                                      content: Text(
+                                          "Czy na pewno chcesz usunąć ten incydent?"),
                                       actions: [
                                         TextButton(
                                           onPressed: () {
@@ -271,7 +270,8 @@ class MapScreenState extends State<MapScreen> {
                                             // Zamknij alert i usuń incydent
                                             Navigator.of(context).pop();
                                             print(idIncident);
-                                            IncidentController.instance.deleteIncident(idIncident);
+                                            IncidentController.instance
+                                                .deleteIncident(idIncident);
                                             loadEventsFromDatabase();
                                             Navigator.of(context).pop();
                                           },
@@ -284,7 +284,8 @@ class MapScreenState extends State<MapScreen> {
                               },
                               style: ElevatedButton.styleFrom(
                                 foregroundColor: Colors.white,
-                                backgroundColor: Colors.red, // Kolor tekstu przycisku
+                                backgroundColor:
+                                    Colors.red, // Kolor tekstu przycisku
                               ),
                               child: const Text("Usuń incydent"),
                             ),
@@ -305,12 +306,20 @@ class MapScreenState extends State<MapScreen> {
     }
   }
 
-  Future<void> _addImageMarker(LatLng location, String title, String snippet,
-      DateTime eventDate, DateTime eventEnd, File? image,String? authorUId,String idEvent,) async {
+  Future<void> _addImageMarker(
+    LatLng location,
+    String title,
+    String snippet,
+    DateTime eventDate,
+    DateTime eventEnd,
+    File? image,
+    String? authorUId,
+    String idEvent,
+  ) async {
     var selectedImageFile = image;
     if (selectedImageFile != null) {
       final img.Image originalImage =
-      img.decodeImage(selectedImageFile.readAsBytesSync())!;
+          img.decodeImage(selectedImageFile.readAsBytesSync())!;
 
       const int targetWidth = 200; // Dostosuj szerokość
       const int targetHeight = 200; // Dostosuj wysokość
@@ -340,100 +349,128 @@ class MapScreenState extends State<MapScreen> {
               showModalBottomSheet(
                 context: context,
                 builder: (context) {
-                  return Container(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.title),
-                          title: Text(
-                            "Tytuł: $title",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal,
-                              fontFamily: 'Roboto',
-                            ),
-                          ),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.description),
-                          title: Text(
-                            "Opis: $snippet",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal,
-                              fontFamily: 'Roboto',
-                            ),
-                          ),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.event),
-                          title: Text(
-                            "Data wydarzenia: $formattedEventDate",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal,
-                              fontFamily: 'Roboto',
-                            ),
-                          ),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.event_available),
-                          title: Text(
-                            "Data zakończenia wydarzenia: $formattedEventEnd",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal,
-                              fontFamily: 'Roboto',
-                            ),
-                          ),
-                        ),
-                        if(FirebaseAuth
-                            .instance.currentUser?.uid
-                            .toString()==eventDetailsMap[location]?.authorId)
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Pokazuje alert z potwierdzeniem usunięcia
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text("Potwierdź usunięcie"),
-                                    content: Text("Czy na pewno chcesz usunąć to wydarzenie?"),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          // Zamknij alert i nie rób nic
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text("Nie"),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          // Zamknij alert i usuń event
-                                          Navigator.of(context).pop();
-                                          print(idEvent);
-                                          EventController.instance.deleteEvent(idEvent);
-                                          loadEventsFromDatabase();
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text("Tak"),
+                  return SingleChildScrollView(
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.3),
+                                        blurRadius: 5,
+                                        offset: const Offset(0, 2),
                                       ),
                                     ],
+                                  ),
+                                  margin: const EdgeInsets.all(8),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.memory(
+                                      img.encodePng(resizedImage),
+                                      width: targetWidth.toDouble(),
+                                      height: targetHeight.toDouble(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.title),
+                            title: Text(
+                              "Tytuł: $title",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,
+                                fontFamily: 'Roboto',
+                              ),
+                            ),
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.description),
+                            title: Text(
+                              "Opis: $snippet",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,
+                                fontFamily: 'Roboto',
+                              ),
+                            ),
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.event),
+                            title: Text(
+                              "Data wydarzenia: $formattedEventDate",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,
+                                fontFamily: 'Roboto',
+                              ),
+                            ),
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.event_available),
+                            title: Text(
+                              "Data zakończenia wydarzenia: $formattedEventEnd",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,
+                                fontFamily: 'Roboto',
+                              ),
+                            ),
+                          ),
+                          if (FirebaseAuth.instance.currentUser?.uid
+                                  .toString() ==
+                              eventDetailsMap[location]?.authorId)
+                            Center(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text("Potwierdź usunięcie"),
+                                        content: const Text(
+                                            "Czy na pewno chcesz usunąć to wydarzenie?"),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: const Text("Nie"),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                              print(idEvent);
+                                              EventController.instance
+                                                  .deleteEvent(idEvent);
+                                              loadEventsFromDatabase();
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text("Tak"),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   );
                                 },
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor: Colors.red, // Kolor tekstu przycisku
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: Colors.red,
+                                ),
+                                child: const Text("Usuń wydarzenie"),
+                              ),
                             ),
-                            child: const Text("Usuń wydarzenie"),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -527,7 +564,8 @@ class MapScreenState extends State<MapScreen> {
                                     //_addImageMarker(latLng, title, snippet,eventDate!, eventEnd, imageFile);
                                   } else {
                                     // Dodaj incydent (bez daty zakończenia)
-                                    IncidentModel incident_model = IncidentModel(
+                                    IncidentModel incident_model =
+                                        IncidentModel(
                                       title: title,
                                       snippet: snippet,
                                       imageFile: imageFile.path,
@@ -538,7 +576,8 @@ class MapScreenState extends State<MapScreen> {
                                           .instance.currentUser?.uid
                                           .toString(),
                                     );
-                                    IncidentController.instance.createIncident(incident_model);
+                                    IncidentController.instance
+                                        .createIncident(incident_model);
                                     //_addImageMarkerIncident(latLng, title, snippet, eventDate!);
                                   }
                                   loadEventsFromDatabase();
@@ -549,8 +588,8 @@ class MapScreenState extends State<MapScreen> {
                                 isAddingMarker = false;
                                 //});
                               },
-                            );//;-od future
-                          }),//future builder
+                            ); //;-od future
+                          }), //future builder
                     ),
                   );
                 }
@@ -582,40 +621,40 @@ class MapScreenState extends State<MapScreen> {
         ),
         floatingActionButton: isAddingMarker
             ? FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              isAddingMarker = false; // Wyłącz tryb dodawania znacznika
-            });
-          },
-          backgroundColor: Colors.green,
-          child: const Icon(Icons.close),
-        )
+                onPressed: () {
+                  setState(() {
+                    isAddingMarker = false; // Wyłącz tryb dodawania znacznika
+                  });
+                },
+                backgroundColor: Colors.green,
+                child: const Icon(Icons.close),
+              )
             : ElevatedButton(
-          onPressed: () {
-            setState(() {
-              isAddingMarker = true; // Włącz tryb dodawania znacznika
-            });
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            padding: const EdgeInsets.all(5),
-          ),
-          child: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.add_circle,
-                size: 23,
-              ),
-              Text(
-                'Dodaj wydarzenie/incydent',
-                style: TextStyle(
-                  fontSize: 18,
+                onPressed: () {
+                  setState(() {
+                    isAddingMarker = true; // Włącz tryb dodawania znacznika
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.all(5),
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.add_circle,
+                      size: 23,
+                    ),
+                    Text(
+                      'Dodaj wydarzenie/incydent',
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       ),
     );

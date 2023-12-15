@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:inzynierka/Ekrany/controllers/event_controller.dart';
@@ -85,12 +86,39 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
       });
     }
   }
+  Widget _buildImageSelection() {
+    return Column(
+      children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () async {
+                  final pickedFile = await ImagePicker().pickImage(
+                    source: ImageSource.gallery,
+                  );
+
+                  if (pickedFile != null) {
+                    setState(() {
+                      imageFile = File(pickedFile.path);
+                    });
+                  }
+                },
+                child: const Text('Wybierz zdjęcie z galerii',
+                    style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
 
   Widget _buildEventFields() {
     return Column(
       children: [
         Column(
           children: [
+            _buildImageSelection(),
             TextField(
               controller: dateController,
               decoration: const InputDecoration(

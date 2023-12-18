@@ -77,4 +77,55 @@ class IncidentRepository extends GetxController {
         databaseURL: 'https://inzynierka-58aab-default-rtdb.europe-west1.firebasedatabase.app/');
     await rtdb.ref().child("RTDB").child("Incidents").child(id).remove().then((value)=>null);
   }
+  addLike(String id) async{
+    String? userid = FirebaseAuth.instance.currentUser?.uid;
+    if (userid == null) {
+
+    } else {
+      //Dodawanie do bazy danych
+
+      final fbapp = Firebase.app();
+      final rtdb = FirebaseDatabase.instanceFor(
+          app: fbapp,
+          databaseURL: 'https://inzynierka-58aab-default-rtdb.europe-west1.firebasedatabase.app/');
+      DatabaseReference ref = rtdb.ref().child("RTDB").child("Likes");
+      await ref.set({
+        id: {
+          userid : "1"
+        }
+      });
+    }
+  }
+  removeLike(String id) async{
+    String? userid = FirebaseAuth.instance.currentUser?.uid;
+    if (userid == null) {
+
+    } else {
+      //Dodawanie do bazy danych
+
+      final fbapp = Firebase.app();
+      final rtdb = FirebaseDatabase.instanceFor(
+          app: fbapp,
+          databaseURL: 'https://inzynierka-58aab-default-rtdb.europe-west1.firebasedatabase.app/');
+      DatabaseReference ref = rtdb.ref().child("RTDB").child("Likes").child(id);
+      await ref.child(userid).remove().then((value) => null);
+    }
+  }
+  checkLikes(String id) async{
+    int likes = 0;
+    final fbapp = Firebase.app();
+    final rtdb = FirebaseDatabase.instanceFor(
+        app: fbapp,
+        databaseURL: 'https://inzynierka-58aab-default-rtdb.europe-west1.firebasedatabase.app/');
+    DatabaseReference ref = rtdb.ref().child("RTDB").child("Likes");
+    await ref.child(id).get().then((snapshot){
+      if(snapshot.exists) {
+        Map values = snapshot.value as Map;
+        values.forEach((key, value) {
+          likes +=1;
+        });
+      }
+    });
+    return likes;
+  }
 }

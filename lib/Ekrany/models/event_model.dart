@@ -16,7 +16,7 @@ class EventModel{
     required this.location,
     required this.eventDate,
     required this.eventEnd,
-    required this.authorId
+    required this.authorId,
 });
 
   toJSON(){

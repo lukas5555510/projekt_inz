@@ -19,6 +19,15 @@ class IncidentController extends GetxController{
   Future deleteIncident(String id)async{
     await incidentRepo.deleteIncident(id);
   }
+  Future addLike(String id)async{
+    await incidentRepo.addLike(id);
+  }
+  Future removeLike(String id)async{
+    await incidentRepo.removeLike(id);
+  }
+  Future checkLikes(String id) async{
+    return await incidentRepo.checkLikes(id);
+  }
   LatLng stringToLatLng(String coordinatesString) {
     // Usuwanie zbędnych znaków z ciągu znaków
     String cleanedString = coordinatesString

@@ -176,6 +176,7 @@ class MapScreenState extends State<MapScreen> {
     String? authorUId,
     String idIncident,
   ) async {
+    int likes = await eventController.checkLikes(idIncident);
     var selectedImageFile = image;
     if (selectedImageFile != null) {
       final img.Image originalImage =
@@ -242,6 +243,45 @@ class MapScreenState extends State<MapScreen> {
                               fontWeight: FontWeight.normal,
                               fontFamily: 'Roboto',
                             ),
+                          ),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.event_available),
+                          title: Text(
+                            "Polubienia: $likes",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal,
+                              fontFamily: 'Roboto',
+                            ),
+                          ),
+                        ),
+                        Center(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              eventController.addLike(idIncident);
+                              Navigator.of(context).pop();
+                              loadEventsFromDatabase();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.blue,
+                            ),
+                            child: const Text("Like"),
+                          ),
+                        ),
+                        Center(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              eventController.removeLike(idIncident);
+                              Navigator.of(context).pop();
+                              loadEventsFromDatabase();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.blue,
+                            ),
+                            child: const Text("Remove Like"),
                           ),
                         ),
                         if (FirebaseAuth.instance.currentUser?.uid.toString() ==
@@ -316,6 +356,7 @@ class MapScreenState extends State<MapScreen> {
     String? authorUId,
     String idEvent,
   ) async {
+    int likes = await eventController.checkLikes(idEvent);
     var selectedImageFile = image;
     if (selectedImageFile != null) {
       final img.Image originalImage =
@@ -426,6 +467,45 @@ class MapScreenState extends State<MapScreen> {
                                 fontWeight: FontWeight.normal,
                                 fontFamily: 'Roboto',
                               ),
+                            ),
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.event_available),
+                            title: Text(
+                              "Polubienia: $likes",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,
+                                fontFamily: 'Roboto',
+                              ),
+                            ),
+                          ),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                  eventController.addLike(idEvent);
+                                  Navigator.of(context).pop();
+                                  loadEventsFromDatabase();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Colors.blue,
+                              ),
+                              child: const Text("Like"),
+                            ),
+                          ),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                eventController.removeLike(idEvent);
+                                Navigator.of(context).pop();
+                                loadEventsFromDatabase();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Colors.blue,
+                              ),
+                              child: const Text("Remove Like"),
                             ),
                           ),
                           if (FirebaseAuth.instance.currentUser?.uid

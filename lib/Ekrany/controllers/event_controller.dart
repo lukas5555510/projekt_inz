@@ -19,6 +19,15 @@ class EventController extends GetxController{
   Future deleteEvent(String id)async{
     await eventRepo.deleteEvent(id);
   }
+  Future addLike(String id)async{
+    await eventRepo.addLike(id);
+  }
+  Future removeLike(String id)async{
+    await eventRepo.removeLike(id);
+  }
+  Future checkLikes(String id) async{
+    return await eventRepo.checkLikes(id);
+  }
   LatLng stringToLatLng(String coordinatesString) {
     // Usuwanie zbędnych znaków z ciągu znaków
     String cleanedString = coordinatesString

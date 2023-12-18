@@ -105,7 +105,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                   }
                 },
                 child: const Text('Wybierz zdjęcie z galerii',
-                    style: TextStyle(color: Colors.white)),
+                    style: TextStyle(color: Colors.black)),
               ),
             ],
           ),
@@ -123,7 +123,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
               controller: dateController,
               decoration: const InputDecoration(
                 labelText: 'Data i godzina rozpoczęcia wydarzenia',
-                labelStyle: TextStyle(color: Colors.white),
+                labelStyle: TextStyle(color: Colors.black),
                 prefixIcon: Icon(Icons.date_range),
               ),
               enabled: false,
@@ -162,7 +162,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                 }
               },
               child: const Text('Wybierz datę i godzinę rozpoczęcia',
-                  style: TextStyle(color: Colors.white)),
+                  style: TextStyle(color: Colors.black)),
             ),
           ],
         ),
@@ -172,7 +172,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
               controller: endDateController,
               decoration: const InputDecoration(
                 labelText: 'Data i godzina zakończenia wydarzenia',
-                labelStyle: TextStyle(color: Colors.white),
+                labelStyle: TextStyle(color: Colors.black),
                 prefixIcon: Icon(Icons.date_range),
               ),
               enabled: false,
@@ -211,7 +211,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                 }
               },
               child: const Text('Wybierz datę i godzinę zakończenia',
-                  style: TextStyle(color: Colors.white)),
+                  style: TextStyle(color: Colors.black)),
             ),
           ],
         ),
@@ -229,7 +229,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
               _loadEventImage(selected!);
             });
           },
-          hint: const Text('Wybierz wydarzenie', style: TextStyle(color: Colors.white)),
+          hint: const Text('Wybierz wydarzenie', style: TextStyle(color: Colors.black)),
         ),
       ],
     );
@@ -245,7 +245,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                 controller: dateController,
                 decoration: const InputDecoration(
                   labelText: 'Data incydentu',
-                  labelStyle: TextStyle(color: Colors.white),
+                  labelStyle: TextStyle(color: Colors.black),
                   prefixIcon: Icon(Icons.date_range),
                 ),
                 enabled: false,
@@ -285,7 +285,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                 }
               },
               child: Text('Wybierz datę i godzinę',
-                  style: TextStyle(color: Colors.white)),
+                  style: TextStyle(color: Colors.black)),
             ),
           ],
         ),
@@ -303,7 +303,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
               _loadEventImage(selected!); // Zaktualizuj obraz dla incydentu
             });
           },
-          hint: Text('Wybierz incydent', style: TextStyle(color: Colors.white)),
+          hint: Text('Wybierz incydent', style: TextStyle(color: Colors.black)),
         ),
       ],
     );
@@ -316,7 +316,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
         backgroundColor: Colors.green,
         title: const Text(
           'Szczegóły wydarzenia',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
         ),
       ),
       body: Container(
@@ -366,7 +366,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                     showDateField = true;
                   });
                 },
-                hint: Text('Wybierz rodzaj zdarzenia', style: TextStyle(color: Colors.white)),
+                hint: Text('Wybierz rodzaj zdarzenia', style: TextStyle(color: Colors.black)),
               ),
               if (showDateField)
                 eventType == 'Wydarzenie'

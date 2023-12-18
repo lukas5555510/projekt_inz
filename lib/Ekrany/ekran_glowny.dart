@@ -321,14 +321,16 @@ class MapScreenState extends State<MapScreen> {
       final img.Image originalImage =
           img.decodeImage(selectedImageFile.readAsBytesSync())!;
 
-      const int targetWidth = 200; // Dostosuj szerokość
-      const int targetHeight = 200; // Dostosuj wysokość
+      const int targetWidth = 180; // Dostosuj szerokość
+      const int targetHeight = 180; // Dostosuj wysokość
+
 
       final img.Image resizedImage = img.copyResize(originalImage,
           width: targetWidth, height: targetHeight);
+      final img.Image trimedImage = img.copyResizeCropSquare(resizedImage, radius: 15, size: 200);
 
       final BitmapDescriptor imageMarker = BitmapDescriptor.fromBytes(
-          Uint8List.fromList(img.encodePng(resizedImage)));
+          Uint8List.fromList(img.encodePng(trimedImage)));
 
       final eventDetails = EventDetails(
         title: title,

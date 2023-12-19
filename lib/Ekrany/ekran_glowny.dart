@@ -23,6 +23,16 @@ class MapScreen extends StatefulWidget {
   @override
   State<MapScreen> createState() => MapScreenState();
 }
+bool? eventsCh = true;
+bool? incidentsCh = true;
+bool? eventsSub1Ch = true;
+bool? incidentsSub1Ch = true;
+bool? eventsSub2Ch = true;
+bool? incidentsSub2Ch = true;
+bool? eventsSub3Ch = true;
+bool? incidentsSub3Ch = true;
+bool? eventsSub4Ch = true;
+bool? incidentsSub4Ch = true;
 
 class EventDetails {
   final String title;
@@ -69,6 +79,8 @@ class MapScreenState extends State<MapScreen> {
   Map<LatLng, EventDetails> eventDetailsMap = {};
   Map<LatLng, EventDetailsIncident> eventDetailsMapIncident = {};
 
+
+
   static const CameraPosition _kLake = CameraPosition(
     bearing: 192.8334901395799,
     target: LatLng(51.2362765276371, 22.58917608263832),
@@ -76,49 +88,57 @@ class MapScreenState extends State<MapScreen> {
     zoom: 19.151926040649414,
   );
 
-  Future<void> loadEventsFromDatabase() async {
+  Future<void> loadEventsFromDatabase(
+      bool? eventsCheck,
+      bool? incidentsCheck,
+      bool? eventsSub1Check,
+      bool? eventsSub2Check,
+      bool? eventsSub3Check,
+      bool? eventsSub4Check,
+      bool? incidentsSub1Check,
+      bool? incidentsSub2Check,
+      bool? incidentsSub3Check,
+      bool? incidentsSub4Check,
+      ) async {
     try {
       final incidents = await incidentController.pullIncidents();
       final events = await eventController.pullEvents();
-
       markers.clear();
       eventDetailsMap.clear();
       eventDetailsMapIncident.clear();
 
       events.forEach((key, value) {
         final location = eventController.stringToLatLng(value.location);
-        if (value.eventType == 'Wydarzenie' && value.eventEnd != null) {
-          _addImageMarker(
-              location,
-              value.title,
-              value.snippet,
-              DateTime.parse(value.eventDate),
-              DateTime.parse(value.eventEnd!),
-              File(value.imageFile),
-              value.authorId,
-              key);
-        } /*else if (value.eventType == 'Incydent') {
-          _addImageMarkerIncident(
-            location,
-            value.title,
-            value.snippet,
-            DateTime.parse(value.eventDate),
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }*/
+        if (value.eventType == 'Wydarzenie' && value.eventEnd != null && eventsCheck == true) {
+          if(eventsSub1Check == true && value.eventSubType == 'Koncert') {
+            _addImageMarker(location,value.title,value.snippet,DateTime.parse(value.eventDate), DateTime.parse(value.eventEnd!), File(value.imageFile), value.authorId, key);
+          }
+          if(eventsSub2Check == true && value.eventSubType == 'Wystawa') {
+            _addImageMarker(location,value.title,value.snippet,DateTime.parse(value.eventDate), DateTime.parse(value.eventEnd!), File(value.imageFile), value.authorId, key);
+          }
+          if(eventsSub3Check ==true && value.eventSubType == 'Festyn') {
+            _addImageMarker(location,value.title,value.snippet,DateTime.parse(value.eventDate), DateTime.parse(value.eventEnd!), File(value.imageFile), value.authorId, key);
+          }
+          if(eventsSub4Check == true && value.eventSubType == 'Zlot społeczności') {
+            _addImageMarker(location,value.title,value.snippet,DateTime.parse(value.eventDate), DateTime.parse(value.eventEnd!), File(value.imageFile), value.authorId, key);
+          }
+        }
       });
       incidents.forEach((key, value) {
         final location = incidentController.stringToLatLng(value.location);
-        if (value.eventType == 'Incydent') {
-          _addImageMarkerIncident(
-              location,
-              value.title,
-              value.snippet,
-              DateTime.parse(value.eventDate),
-              File(value.imageFile),
-              value.authorId,
-              key);
+        if (value.eventType == 'Incydent' && incidentsCheck == true) {
+          if(incidentsSub1Check == true && value.eventSubType == 'Kradzież') {
+            _addImageMarkerIncident(location, value.title, value.snippet, DateTime.parse(value.eventDate), File(value.imageFile), value.authorId, key);
+          }
+          if(incidentsSub2Check == true && value.eventSubType == 'Wypadek') {
+            _addImageMarkerIncident(location, value.title, value.snippet, DateTime.parse(value.eventDate), File(value.imageFile), value.authorId, key);
+          }
+          if(incidentsSub3Check == true && value.eventSubType == 'Dzikie zwierzęta') {
+            _addImageMarkerIncident(location, value.title, value.snippet, DateTime.parse(value.eventDate), File(value.imageFile), value.authorId, key);
+          }
+          if(incidentsSub4Check == true && value.eventSubType == 'Bezpańskie zwierzęta') {
+            _addImageMarkerIncident(location, value.title, value.snippet, DateTime.parse(value.eventDate), File(value.imageFile), value.authorId, key);
+          }
         }
       });
     } catch (e) {
@@ -130,7 +150,7 @@ class MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     getCurrentLocation();
-    loadEventsFromDatabase();
+    loadEventsFromDatabase(eventsCh, incidentsCh,eventsSub1Ch,eventsSub2Ch,eventsSub3Ch,eventsSub4Ch,incidentsSub1Ch,incidentsSub2Ch,incidentsSub3Ch,incidentsSub4Ch);
   }
 
   Future<void> getCurrentLocation() async {
@@ -261,7 +281,7 @@ class MapScreenState extends State<MapScreen> {
                             onPressed: () {
                               eventController.addLike(idIncident);
                               Navigator.of(context).pop();
-                              loadEventsFromDatabase();
+                              loadEventsFromDatabase(eventsCh, incidentsCh,eventsSub1Ch,eventsSub2Ch,eventsSub3Ch,eventsSub4Ch,incidentsSub1Ch,incidentsSub2Ch,incidentsSub3Ch,incidentsSub4Ch);
                             },
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Colors.white,
@@ -275,7 +295,7 @@ class MapScreenState extends State<MapScreen> {
                             onPressed: () {
                               eventController.removeLike(idIncident);
                               Navigator.of(context).pop();
-                              loadEventsFromDatabase();
+                              loadEventsFromDatabase(eventsCh, incidentsCh,eventsSub1Ch,eventsSub2Ch,eventsSub3Ch,eventsSub4Ch,incidentsSub1Ch,incidentsSub2Ch,incidentsSub3Ch,incidentsSub4Ch);
                             },
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Colors.white,
@@ -312,7 +332,7 @@ class MapScreenState extends State<MapScreen> {
                                             print(idIncident);
                                             IncidentController.instance
                                                 .deleteIncident(idIncident);
-                                            loadEventsFromDatabase();
+                                            loadEventsFromDatabase(eventsCh, incidentsCh,eventsSub1Ch,eventsSub2Ch,eventsSub3Ch,eventsSub4Ch,incidentsSub1Ch,incidentsSub2Ch,incidentsSub3Ch,incidentsSub4Ch);
                                             Navigator.of(context).pop();
                                           },
                                           child: Text("Tak"),
@@ -485,7 +505,7 @@ class MapScreenState extends State<MapScreen> {
                               onPressed: () {
                                   eventController.addLike(idEvent);
                                   Navigator.of(context).pop();
-                                  loadEventsFromDatabase();
+                                  loadEventsFromDatabase(eventsCh, incidentsCh,eventsSub1Ch,eventsSub2Ch,eventsSub3Ch,eventsSub4Ch,incidentsSub1Ch,incidentsSub2Ch,incidentsSub3Ch,incidentsSub4Ch);
                               },
                               style: ElevatedButton.styleFrom(
                                 foregroundColor: Colors.white,
@@ -499,7 +519,7 @@ class MapScreenState extends State<MapScreen> {
                               onPressed: () {
                                 eventController.removeLike(idEvent);
                                 Navigator.of(context).pop();
-                                loadEventsFromDatabase();
+                                loadEventsFromDatabase(eventsCh, incidentsCh,eventsSub1Ch,eventsSub2Ch,eventsSub3Ch,eventsSub4Ch,incidentsSub1Ch,incidentsSub2Ch,incidentsSub3Ch,incidentsSub4Ch);
                               },
                               style: ElevatedButton.styleFrom(
                                 foregroundColor: Colors.white,
@@ -534,7 +554,7 @@ class MapScreenState extends State<MapScreen> {
                                               print(idEvent);
                                               EventController.instance
                                                   .deleteEvent(idEvent);
-                                              loadEventsFromDatabase();
+                                              loadEventsFromDatabase(eventsCh, incidentsCh,eventsSub1Ch,eventsSub2Ch,eventsSub3Ch,eventsSub4Ch,incidentsSub1Ch,incidentsSub2Ch,incidentsSub3Ch,incidentsSub4Ch);
                                               Navigator.of(context).pop();
                                             },
                                             child: Text("Tak"),
@@ -589,6 +609,136 @@ class MapScreenState extends State<MapScreen> {
               },
             ),
             GButton(
+              icon: Icons.search,
+              text: "Filtr",
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) {
+                    return SingleChildScrollView(
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(children: [
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: eventsCh, // Domyślnie zaznaczony
+                                    onChanged: (bool? value) {
+                                        eventsCh = value;
+                                    },
+                                  ),
+                                  Text('Wydarzenia'),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: eventsSub1Ch, // Domyślnie zaznaczony
+                                    onChanged: (bool? value) {
+                                      eventsSub1Ch = value;
+                                    },
+                                  ),
+
+                                  Text('Koncerty'),
+                                  Checkbox(
+                                    value: eventsSub2Ch, // Domyślnie zaznaczony
+                                    onChanged: (bool? value) {
+                                      eventsSub2Ch = value;
+                                    },
+                                  ),
+                                  Text('Wystawy'),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: eventsSub3Ch, // Domyślnie zaznaczony
+                                    onChanged: (bool? value) {
+                                      eventsSub3Ch = value;
+                                    },
+                                  ),
+                                  Text('Festyny'),
+                                  Checkbox(
+                                    value: eventsSub4Ch, // Domyślnie zaznaczony
+                                    onChanged: (bool? value) {
+                                      eventsSub4Ch = value;
+                                    },
+                                  ),
+                                  Text('Zloty społeczności'),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: incidentsCh, // Domyślnie zaznaczony
+                                    onChanged: (bool? value) {
+                                      incidentsCh = value;
+                                    },
+                                  ),
+                                  Text('Incydenty'),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: incidentsSub1Ch, // Domyślnie zaznaczony
+                                    onChanged: (bool? value) {
+                                      incidentsSub1Ch = value;
+                                    },
+                                  ),
+                                  Text('Kradzieże'),
+                                  Checkbox(
+                                    value: incidentsSub2Ch, // Domyślnie zaznaczony
+                                    onChanged: (bool? value) {
+                                      incidentsSub2Ch = value;
+                                    },
+                                  ),
+                                  Text('Wypadki'),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: incidentsSub3Ch, // Domyślnie zaznaczony
+                                    onChanged: (bool? value) {
+                                      incidentsSub3Ch = value;
+                                    },
+                                  ),
+                                  Text('Dzikie zwierzęta'),
+                                  Checkbox(
+                                    value: incidentsSub4Ch, // Domyślnie zaznaczony
+                                    onChanged: (bool? value) {
+                                      incidentsSub4Ch = value;
+                                    },
+                                  ),
+                                  Text('Bezpańskie zwierzęta'),
+                                ],
+                              ),
+                              Center(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    navigateToScreen(context, const MapScreen());
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    backgroundColor: Colors.blue,
+                                  ),
+                                  child: const Text("Filtruj"),
+                                ),
+                              ),
+                            ],),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+            GButton(
               icon: Icons.person,
               text: "Profil",
               onPressed: () {
@@ -617,11 +767,11 @@ class MapScreenState extends State<MapScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => FutureBuilder(
-                          future: loadEventsFromDatabase(),
+                          future: loadEventsFromDatabase(eventsCh, incidentsCh,eventsSub1Ch,eventsSub2Ch,eventsSub3Ch,eventsSub4Ch,incidentsSub1Ch,incidentsSub2Ch,incidentsSub3Ch,incidentsSub4Ch),
                           builder: (context, snapshot) {
                             return MarkerDetailsScreen(
                               onMarkerSaved: (title, snippet, imageFile,
-                                  eventType, eventDate, eventEnd) {
+                                  eventType,eventSubType, eventDate, eventEnd) {
                                 if (title.isNotEmpty &&
                                     snippet.isNotEmpty &&
                                     imageFile != null) {
@@ -634,6 +784,7 @@ class MapScreenState extends State<MapScreen> {
                                       snippet: snippet,
                                       imageFile: imageFile.path,
                                       eventType: eventType.toString(),
+                                      eventSubType: eventSubType.toString(),
                                       location: latLng.toString(),
                                       eventDate: eventDate.toString(),
                                       eventEnd: eventEnd.toString(),
@@ -652,6 +803,7 @@ class MapScreenState extends State<MapScreen> {
                                       snippet: snippet,
                                       imageFile: imageFile.path,
                                       eventType: eventType.toString(),
+                                      eventSubType: eventSubType.toString(),
                                       location: latLng.toString(),
                                       eventDate: eventDate.toString(),
                                       authorId: FirebaseAuth
@@ -662,7 +814,7 @@ class MapScreenState extends State<MapScreen> {
                                         .createIncident(incident_model);
                                     //_addImageMarkerIncident(latLng, title, snippet, eventDate!);
                                   }
-                                  loadEventsFromDatabase();
+                                  loadEventsFromDatabase(eventsCh, incidentsCh,eventsSub1Ch,eventsSub2Ch,eventsSub3Ch,eventsSub4Ch,incidentsSub1Ch,incidentsSub2Ch,incidentsSub3Ch,incidentsSub4Ch);
                                 }
                               },
                               onMarkerCancelled: () {

@@ -21,6 +21,7 @@ class EventRepository extends GetxController {
       map["snipped"] = event.snippet;
       map["imageFile"] = event.imageFile.toString();
       map["eventType"] = event.eventType.toString();
+      map["eventSubType"] = event.eventSubType.toString();
       map["eventDate"] = event.eventDate.toString();
       map["endDate"] = event.eventEnd.toString();
       map["location"] = event.location.toString();
@@ -60,6 +61,7 @@ class EventRepository extends GetxController {
                 snippet: value['snipped'],
                 imageFile: value['imageFile'],
                 eventType: value['eventType'],
+                eventSubType: value['eventSubType'],
                 location: value['location'],
                 eventDate: value['eventDate'],
                 eventEnd: value['endDate'],

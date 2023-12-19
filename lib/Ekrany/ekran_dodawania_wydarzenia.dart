@@ -11,7 +11,7 @@ import 'package:inzynierka/Reusable_widgets/reusable_widget.dart';
 
 class MarkerDetailsScreen extends StatefulWidget {
   final void Function(String title, String snippet, File? imageFile,
-      String? eventType, DateTime? eventDate, DateTime? eventEnd) onMarkerSaved;
+      String? eventType,String? eventSubType, DateTime? eventDate, DateTime? eventEnd) onMarkerSaved;
 
   const MarkerDetailsScreen({
     required this.onMarkerSaved,
@@ -35,7 +35,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
   final TextEditingController snippetController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
-  String? selectedEvent;
+  String? eventSubType;
 
   final controller = Get.put(EventController());
 
@@ -216,7 +216,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
           ],
         ),
         DropdownButton<String>(
-          value: selectedEvent,
+          value: eventSubType,
           items: events.map((String value) {
             return DropdownMenuItem<String>(
               value: value,
@@ -225,7 +225,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
           }).toList(),
           onChanged: (selected) {
             setState(() {
-              selectedEvent = selected;
+              eventSubType = selected;
               _loadEventImage(selected!);
             });
           },
@@ -290,7 +290,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
           ],
         ),
         DropdownButton<String>(
-          value: selectedEvent,
+          value: eventSubType,
           items: incidents.map((String value) {
             return DropdownMenuItem<String>(
               value: value,
@@ -299,7 +299,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
           }).toList(),
           onChanged: (selected) {
             setState(() {
-              selectedEvent = selected;
+              eventSubType = selected;
               _loadEventImage(selected!); // Zaktualizuj obraz dla incydentu
             });
           },
@@ -362,7 +362,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                 onChanged: (selectedEventType) {
                   setState(() {
                     eventType = selectedEventType;
-                    selectedEvent = null;
+                    eventSubType = null;
                     showDateField = true;
                   });
                 },
@@ -386,16 +386,17 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                     _showSnackbar(context, 'Wybierz rodzaj zdarzenia');
                   } else if (eventDate == null) {
                     _showSnackbar(context, 'Wybierz datę wydarzenia/incydentu');
-                  } else if (selectedEvent == null) {
+                  } else if (eventSubType == null) {
                     _showSnackbar(context, 'Wybierz wydarzenie lub incydent');
                   } else {
-                    widget.onMarkerSaved(title, snippet, imageFile, eventType,
+                    widget.onMarkerSaved(title, snippet, imageFile, eventType, eventSubType,
                         eventDate, eventEnd); // Przekaż endDate
                     Navigator.pop(context, {
                       'title': title,
                       'snippet': snippet,
                       'imageFile': imageFile,
                       'eventType': eventType,
+                      'eventSubType': eventSubType,
                       'eventDate': eventDate,
                       'endDate': eventEnd, // Przekaż endDate
                     });

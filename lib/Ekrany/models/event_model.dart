@@ -3,6 +3,7 @@ class EventModel{
   final String snippet;
   final String imageFile;
   final String eventType;
+  final String eventSubType;
   final String location;
   final String eventDate;
   final String eventEnd;
@@ -13,6 +14,7 @@ class EventModel{
     required this.snippet,
     required this.imageFile,
     required this.eventType,
+    required this.eventSubType,
     required this.location,
     required this.eventDate,
     required this.eventEnd,
@@ -25,6 +27,7 @@ class EventModel{
       "snippet": snippet,
       "imageFile": imageFile,
       "eventType": eventType,
+      "eventSubType": eventSubType,
       "location":location,
       "eventDate": eventDate,
       "eventEnd": eventEnd,
@@ -37,6 +40,7 @@ return EventModel(
     snippet: map['snippet'],
     imageFile: map['imageFile'],
     eventType: map['eventType'],
+    eventSubType: map['eventSubType'],
     location: map['location'],
     eventDate: map['eventDate'],
     eventEnd: map['eventEnd'],

@@ -20,6 +20,7 @@ class IncidentRepository extends GetxController {
       map["snipped"] = incident.snippet;
       map["imageFile"] = incident.imageFile;
       map["eventType"] = incident.eventType;
+      map["eventSubType"] = incident.eventSubType;
       map["eventDate"] = incident.eventDate;
       map["location"] = incident.location;
       map["authorUid"] = userid.toString();
@@ -57,6 +58,7 @@ class IncidentRepository extends GetxController {
                 snippet: value['snipped'],
                 imageFile: value['imageFile'],
                 eventType: value['eventType'],
+                eventSubType: value['eventSubType'],
                 location: value['location'],
                 eventDate: value['eventDate'],
                 authorId: value['authorUid']);

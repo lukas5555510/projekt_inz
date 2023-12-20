@@ -11,7 +11,7 @@ import 'package:inzynierka/Reusable_widgets/reusable_widget.dart';
 
 class MarkerDetailsScreen extends StatefulWidget {
   final void Function(String title, String snippet, File? imageFile,
-      String? eventType, DateTime? eventDate, DateTime? eventEnd) onMarkerSaved;
+      String? eventType,String? eventSubType, DateTime? eventDate, DateTime? eventEnd) onMarkerSaved;
 
   const MarkerDetailsScreen({
     required this.onMarkerSaved,
@@ -35,7 +35,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
   final TextEditingController snippetController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
-  String? selectedEvent;
+  String? eventSubType;
 
   final controller = Get.put(EventController());
 
@@ -105,7 +105,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                   }
                 },
                 child: const Text('Wybierz zdjęcie z galerii',
-                    style: TextStyle(color: Colors.white)),
+                    style: TextStyle(color: Colors.black)),
               ),
             ],
           ),
@@ -122,7 +122,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
               controller: dateController,
               decoration: const InputDecoration(
                 labelText: 'Data i godzina rozpoczęcia wydarzenia',
-                labelStyle: TextStyle(color: Colors.white),
+                labelStyle: TextStyle(color: Colors.black),
                 prefixIcon: Icon(Icons.date_range),
               ),
               enabled: false,
@@ -161,7 +161,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                 }
               },
               child: const Text('Wybierz datę i godzinę rozpoczęcia',
-                  style: TextStyle(color: Colors.white)),
+                  style: TextStyle(color: Colors.black)),
             ),
           ],
         ),
@@ -171,7 +171,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
               controller: endDateController,
               decoration: const InputDecoration(
                 labelText: 'Data i godzina zakończenia wydarzenia',
-                labelStyle: TextStyle(color: Colors.white),
+                labelStyle: TextStyle(color: Colors.black),
                 prefixIcon: Icon(Icons.date_range),
               ),
               enabled: false,
@@ -210,12 +210,12 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                 }
               },
               child: const Text('Wybierz datę i godzinę zakończenia',
-                  style: TextStyle(color: Colors.white)),
+                  style: TextStyle(color: Colors.black)),
             ),
           ],
         ),
         DropdownButton<String>(
-          value: selectedEvent,
+          value: eventSubType,
           items: events.map((String value) {
             return DropdownMenuItem<String>(
               value: value,
@@ -224,11 +224,11 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
           }).toList(),
           onChanged: (selected) {
             setState(() {
-              selectedEvent = selected;
+              eventSubType = selected;
               _loadEventImage(selected!);
             });
           },
-          hint: const Text('Wybierz wydarzenie', style: TextStyle(color: Colors.white)),
+          hint: const Text('Wybierz wydarzenie', style: TextStyle(color: Colors.black)),
         ),
         _buildImageSelection(),
       ],
@@ -245,7 +245,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                 controller: dateController,
                 decoration: const InputDecoration(
                   labelText: 'Data incydentu',
-                  labelStyle: TextStyle(color: Colors.white),
+                  labelStyle: TextStyle(color: Colors.black),
                   prefixIcon: Icon(Icons.date_range),
                 ),
                 enabled: false,
@@ -285,12 +285,12 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                 }
               },
               child: Text('Wybierz datę i godzinę',
-                  style: TextStyle(color: Colors.white)),
+                  style: TextStyle(color: Colors.black)),
             ),
           ],
         ),
         DropdownButton<String>(
-          value: selectedEvent,
+          value: eventSubType,
           items: incidents.map((String value) {
             return DropdownMenuItem<String>(
               value: value,
@@ -299,11 +299,11 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
           }).toList(),
           onChanged: (selected) {
             setState(() {
-              selectedEvent = selected;
+              eventSubType = selected;
               _loadEventImage(selected!); // Zaktualizuj obraz dla incydentu
             });
           },
-          hint: Text('Wybierz incydent', style: TextStyle(color: Colors.white)),
+          hint: Text('Wybierz incydent', style: TextStyle(color: Colors.black)),
         ),
       ],
     );
@@ -316,7 +316,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
         backgroundColor: Colors.green,
         title: const Text(
           'Szczegóły wydarzenia',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
         ),
       ),
       body: Container(
@@ -362,11 +362,11 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                 onChanged: (selectedEventType) {
                   setState(() {
                     eventType = selectedEventType;
-                    selectedEvent = null;
+                    eventSubType = null;
                     showDateField = true;
                   });
                 },
-                hint: Text('Wybierz rodzaj zdarzenia', style: TextStyle(color: Colors.white)),
+                hint: Text('Wybierz rodzaj zdarzenia', style: TextStyle(color: Colors.black)),
               ),
               if (showDateField)
                 eventType == 'Wydarzenie'
@@ -386,16 +386,17 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                     _showSnackbar(context, 'Wybierz rodzaj zdarzenia');
                   } else if (eventDate == null) {
                     _showSnackbar(context, 'Wybierz datę wydarzenia/incydentu');
-                  } else if (selectedEvent == null) {
+                  } else if (eventSubType == null) {
                     _showSnackbar(context, 'Wybierz wydarzenie lub incydent');
                   } else {
-                    widget.onMarkerSaved(title, snippet, imageFile, eventType,
+                    widget.onMarkerSaved(title, snippet, imageFile, eventType, eventSubType,
                         eventDate, eventEnd); // Przekaż endDate
                     Navigator.pop(context, {
                       'title': title,
                       'snippet': snippet,
                       'imageFile': imageFile,
                       'eventType': eventType,
+                      'eventSubType': eventSubType,
                       'eventDate': eventDate,
                       'endDate': eventEnd, // Przekaż endDate
                     });

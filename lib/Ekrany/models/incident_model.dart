@@ -4,6 +4,7 @@ class IncidentModel{
   final String snippet;
   final String imageFile;
   final String eventType;
+  final String eventSubType;
   final String eventDate;
   final String location;
   final String? authorId;
@@ -13,6 +14,7 @@ class IncidentModel{
     required this.snippet,
     required this.imageFile,
     required this.eventType,
+    required this.eventSubType,
     required this.eventDate,
     required this.location,
     required this.authorId,
@@ -24,6 +26,7 @@ class IncidentModel{
       "snippet": snippet,
       "imageFile": title,
       "eventType": eventType,
+      "eventSubType": eventSubType,
       "eventDate": eventDate,
       "location": location,
       "authorId": authorId,
@@ -36,6 +39,7 @@ class IncidentModel{
         snippet: map['snippet'],
         imageFile: map['imageFile'],
         eventType: map['eventType'],
+        eventSubType: map['eventSubType'],
         location: map['location'],
         eventDate: map['eventDate'],
         authorId: map['authorId']);

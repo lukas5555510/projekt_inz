@@ -14,6 +14,7 @@ import 'controllers/event_controller.dart';
 import 'ekran_dodawania_wydarzenia.dart';
 import 'package:image/image.dart' as img;
 import 'package:inzynierka/Features/functions.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 import 'models/event_model.dart';
 
@@ -527,7 +528,57 @@ class MapScreenState extends State<MapScreen> {
                               ),
                               child: const Text("Remove Like"),
                             ),
-                          ),
+                          ),//snapshot.data!.items[index].name
+                          FutureBuilder(
+                              future: cloudStorageListResults(idEvent),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<firebase_storage.ListResult> snapshot){
+                              if(snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+                                return Container(
+                                  child: ListView.builder(
+                                    itemCount: snapshot.data!.items.length,
+                                    itemBuilder: (BuildContext context, int index){
+                                      return FutureBuilder(
+                                          future: downloadURL(snapshot.data!.items[index].name,idEvent),
+                                          builder:(BuildContext context,
+                                              AsyncSnapshot<String> snapshot){
+                                            if(snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+                                              return Container(
+                                                  child:Image.network(snapshot.data!),
+                                                );
+
+                                            }
+                                            if(snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData){
+                                              return CircularProgressIndicator();
+                                            }
+                                            return Container();
+
+                                          });
+                                    },
+                                  ),
+                                );
+                              }
+                              if(snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData){
+                                return CircularProgressIndicator();
+                              }
+                              return Container();
+
+                              }),
+                          if (FirebaseAuth.instance.currentUser?.uid
+                              .toString() ==
+                              eventDetailsMap[location]?.authorId)
+                            Center(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  cloudStorageUpload(idEvent);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.black,
+                                  backgroundColor: Colors.blueGrey,
+                                ),
+                                child: const Text("Dodaj zdjecie"),
+                              ),
+                            ),
                           if (FirebaseAuth.instance.currentUser?.uid
                                   .toString() ==
                               eventDetailsMap[location]?.authorId)

@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:get/get.dart';
 import 'package:inzynierka/Ekrany/models/event_model.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:firebase_core/firebase_core.dart' as firebase_core;
 
 class EventRepository extends GetxController {
   static EventRepository get instance => Get.find();
@@ -81,7 +83,29 @@ class EventRepository extends GetxController {
     final rtdb = FirebaseDatabase.instanceFor(
         app: fbapp,
         databaseURL: 'https://inzynierka-58aab-default-rtdb.europe-west1.firebasedatabase.app/');
+    final firebase_storage.FirebaseStorage storage = firebase_storage
+        .FirebaseStorage.instance;
+
+    //try{
     await rtdb.ref().child("RTDB").child("Events").child(id).remove().then((value)=>null);
+    //}on firebase_core.FirebaseException catch (e){
+    //  print(e);
+    //}
+    try{
+      await storage.ref('$id/').delete();
+    }on firebase_core.FirebaseException catch (e){
+      print(e);
+    }
+    await await firebase_storage.FirebaseStorage.instance.ref("${id}/").listAll().then((value) {
+      value.items.forEach((element) {
+        firebase_storage.FirebaseStorage.instance.ref(element.fullPath)
+            .delete();
+      }
+        );
+      });
+
+
+
   }
   
   addLike(String id) async{

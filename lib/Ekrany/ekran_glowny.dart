@@ -15,8 +15,9 @@ import 'ekran_dodawania_wydarzenia.dart';
 import 'package:image/image.dart' as img;
 import 'package:inzynierka/Features/functions.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-
 import 'models/event_model.dart';
+//import 'package:wechat_assets_picker/wechat_assets_picker.dart' as wechat_picker;
+
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -79,7 +80,7 @@ class MapScreenState extends State<MapScreen> {
   File? selectedImageFile; // Przechowuje wybrany obraz
   Map<LatLng, EventDetails> eventDetailsMap = {};
   Map<LatLng, EventDetailsIncident> eventDetailsMapIncident = {};
-
+  //List<wechat_picker.AssetEntity> selectedAssets = <wechat_picker.AssetEntity>[];
 
 
   static const CameraPosition _kLake = CameraPosition(
@@ -528,42 +529,8 @@ class MapScreenState extends State<MapScreen> {
                               ),
                               child: const Text("Remove Like"),
                             ),
-                          ),//snapshot.data!.items[index].name
-                          FutureBuilder(
-                              future: cloudStorageListResults(idEvent),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<firebase_storage.ListResult> snapshot){
-                              if(snapshot.connectionState == ConnectionState.done && snapshot.hasData){
-                                return Container(
-                                  child: ListView.builder(
-                                    itemCount: snapshot.data!.items.length,
-                                    itemBuilder: (BuildContext context, int index){
-                                      return FutureBuilder(
-                                          future: downloadURL(snapshot.data!.items[index].name,idEvent),
-                                          builder:(BuildContext context,
-                                              AsyncSnapshot<String> snapshot){
-                                            if(snapshot.connectionState == ConnectionState.done && snapshot.hasData){
-                                              return Container(
-                                                  child:Image.network(snapshot.data!),
-                                                );
+                          ),
 
-                                            }
-                                            if(snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData){
-                                              return CircularProgressIndicator();
-                                            }
-                                            return Container();
-
-                                          });
-                                    },
-                                  ),
-                                );
-                              }
-                              if(snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData){
-                                return CircularProgressIndicator();
-                              }
-                              return Container();
-
-                              }),
                           if (FirebaseAuth.instance.currentUser?.uid
                               .toString() ==
                               eventDetailsMap[location]?.authorId)
@@ -622,6 +589,69 @@ class MapScreenState extends State<MapScreen> {
                                 child: const Text("Usuń wydarzenie"),
                               ),
                             ),
+                            FutureBuilder(
+                              future: cloudStorageListResults(idEvent),
+                              builder: (BuildContext context, AsyncSnapshot<firebase_storage.ListResult> listSnapshot) {
+                                if (listSnapshot.connectionState == ConnectionState.waiting) {
+                                  return CircularProgressIndicator();
+                                } else if (listSnapshot.hasError) {
+                                  // Obsługa błędu
+                                  return Text('Error: ${listSnapshot.error}');
+                                } else if (!listSnapshot.hasData || listSnapshot.data!.items.isEmpty) {
+                                  return Text('Brak zdjęć z wydarzenia');
+                                } else {
+                                  return Container(
+                                    height: 100,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: listSnapshot.data!.items.length,
+                                      itemBuilder: (BuildContext context, int index) {
+                                        return FutureBuilder(
+                                          future: downloadURL(listSnapshot.data!.items[index].name, idEvent),
+                                          builder: (BuildContext context, AsyncSnapshot<String> urlSnapshot) {
+                                            if (urlSnapshot.connectionState == ConnectionState.done && urlSnapshot.hasData) {
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  // Tu można umieścić kod do pokazywania zdjęcia w większym rozmiarze
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (BuildContext context) {
+                                                      return AlertDialog(
+                                                        content: Image.network(
+                                                          // Wyświetlenie zdjęcia w większym rozmiarze po kliknięciu
+                                                          urlSnapshot.data!,
+                                                          height: 300,
+                                                        ),
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                                child: Container(
+                                                  width: 100,
+                                                  height: 100,
+                                                  margin: EdgeInsets.symmetric(horizontal: 8.0),
+                                                  child: Image.network(urlSnapshot.data!, fit: BoxFit.cover),
+                                                ),
+                                              );
+                                            } else if (urlSnapshot.connectionState == ConnectionState.waiting || !urlSnapshot.hasData) {
+                                              return Container(
+                                                width: 100,
+                                                height: 100,
+                                                margin: EdgeInsets.symmetric(horizontal: 8.0),
+                                                child: CircularProgressIndicator(),
+                                              );
+                                            } else {
+                                              return Container();
+                                            }
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  );
+                                }
+                              },
+                            )
+
                         ],
                       ),
                     ),
@@ -638,6 +668,8 @@ class MapScreenState extends State<MapScreen> {
       });
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {

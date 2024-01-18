@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -20,6 +21,21 @@ Future<void> cloudStorageUpload(String id) async{
   final pickedFile = await ImagePicker().pickImage(
     source: ImageSource.gallery,
   );
+  if(pickedFile != null) {
+    final firebase_storage.FirebaseStorage storage = firebase_storage
+        .FirebaseStorage.instance;
+    String filePath = pickedFile.path;
+    File file = File(filePath);
+    try{
+      await storage.ref('$id/${pickedFile.name}').putFile(file);
+    }on firebase_core.FirebaseException catch (e){
+      print(e);
+    }
+  }
+}
+
+Future<void> cloudStorageUploadDefault(String id, XFile? file) async{
+  final pickedFile = file;
   if(pickedFile != null) {
     final firebase_storage.FirebaseStorage storage = firebase_storage
         .FirebaseStorage.instance;
@@ -65,4 +81,54 @@ Future<String> downloadURL(String imageName, String id) async{
       .FirebaseStorage.instance;
 String downloadURL = await storage.ref('$id/$imageName').getDownloadURL();
 return downloadURL;
+}
+
+Future<Map<String, String>> getImagesFromCloudStorage() async {
+  Map<String, String> imageMap = {};
+  final firebase_storage.FirebaseStorage storage = firebase_storage
+      .FirebaseStorage.instance;
+  try {
+    final firebase_storage.ListResult result = await storage.ref('default/').listAll();
+    final List<firebase_storage.Reference> allImages = result.items;
+
+    for (var imageReference in allImages) {
+      final imageUrl = await imageReference.getDownloadURL();
+      // Przykładowe przypisanie nazwy pliku jako klucz w mapie
+      imageMap[imageReference.name] = imageUrl;
+    }
+  } catch (e) {
+    print('Error getting images from cloud storage: $e');
+  }
+
+  return imageMap;
+}
+Future<Map<String, Uint8List>> getIconsFromCloudStorage() async {
+  Map<String, Uint8List> iconMap = {};
+
+  try {
+    final firebase_storage.ListResult result = await firebase_storage.FirebaseStorage.instance.ref("default/").listAll();
+    final List<firebase_storage.Reference> allImages = result.items;
+
+    for (var imageReference in allImages) {
+      final imageUrl = await imageReference.getDownloadURL();
+      final Uint8List icon = await _createCustomIcon(imageUrl);
+
+      // Przykładowe przypisanie nazwy pliku jako klucz w mapie
+      iconMap[imageReference.name] = icon;
+    }
+  } catch (e) {
+    print('Error getting icons from cloud storage: $e');
+  }
+
+  return iconMap;
+}
+
+Future<Uint8List> _createCustomIcon(String imageUrl) async {
+  // Pobierz obraz z adresu URL
+  final ByteData data = await NetworkAssetBundle(Uri.parse(imageUrl)).load('');
+  final Uint8List bytes = data.buffer.asUint8List();
+
+  // Przekształć obraz na BitmapDescriptor
+
+  return bytes;
 }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -77,10 +76,10 @@ class MapScreenState extends State<MapScreen> {
   String? markerTitle;
   String? markerSnippet;
   bool isAddingMarker = false;
-  File? selectedImageFile; // Przechowuje wybrany obraz
+  //String? selectedImageFile; // Przechowuje wybrany obraz
   Map<LatLng, EventDetails> eventDetailsMap = {};
   Map<LatLng, EventDetailsIncident> eventDetailsMapIncident = {};
-  //List<wechat_picker.AssetEntity> selectedAssets = <wechat_picker.AssetEntity>[];
+  Map<String, Uint8List> iconMap = {};
 
 
   static const CameraPosition _kLake = CameraPosition(
@@ -108,21 +107,22 @@ class MapScreenState extends State<MapScreen> {
       markers.clear();
       eventDetailsMap.clear();
       eventDetailsMapIncident.clear();
-
+      iconMap = await getIconsFromCloudStorage();
+      iconMap.forEach((key, value) {print("name: $key"); });
       events.forEach((key, value) {
         final location = eventController.stringToLatLng(value.location);
         if (value.eventType == 'Wydarzenie' && value.eventEnd != null && eventsCheck == true) {
           if(eventsSub1Check == true && value.eventSubType == 'Koncert') {
-            _addImageMarker(location,value.title,value.snippet,DateTime.parse(value.eventDate), DateTime.parse(value.eventEnd!), File(value.imageFile), value.authorId, key);
+            _addImageMarker(location,value.title,value.snippet,DateTime.parse(value.eventDate), DateTime.parse(value.eventEnd!), value.imageFile, value.authorId, key);
           }
           if(eventsSub2Check == true && value.eventSubType == 'Wystawa') {
-            _addImageMarker(location,value.title,value.snippet,DateTime.parse(value.eventDate), DateTime.parse(value.eventEnd!), File(value.imageFile), value.authorId, key);
+            _addImageMarker(location,value.title,value.snippet,DateTime.parse(value.eventDate), DateTime.parse(value.eventEnd!), value.imageFile, value.authorId, key);
           }
           if(eventsSub3Check ==true && value.eventSubType == 'Festyn') {
-            _addImageMarker(location,value.title,value.snippet,DateTime.parse(value.eventDate), DateTime.parse(value.eventEnd!), File(value.imageFile), value.authorId, key);
+            _addImageMarker(location,value.title,value.snippet,DateTime.parse(value.eventDate), DateTime.parse(value.eventEnd!), value.imageFile, value.authorId, key);
           }
           if(eventsSub4Check == true && value.eventSubType == 'Zlot społeczności') {
-            _addImageMarker(location,value.title,value.snippet,DateTime.parse(value.eventDate), DateTime.parse(value.eventEnd!), File(value.imageFile), value.authorId, key);
+            _addImageMarker(location,value.title,value.snippet,DateTime.parse(value.eventDate), DateTime.parse(value.eventEnd!), value.imageFile, value.authorId, key);
           }
         }
       });
@@ -130,16 +130,16 @@ class MapScreenState extends State<MapScreen> {
         final location = incidentController.stringToLatLng(value.location);
         if (value.eventType == 'Incydent' && incidentsCheck == true) {
           if(incidentsSub1Check == true && value.eventSubType == 'Kradzież') {
-            _addImageMarkerIncident(location, value.title, value.snippet, DateTime.parse(value.eventDate), File(value.imageFile), value.authorId, key);
+            _addImageMarkerIncident(location, value.title, value.snippet, DateTime.parse(value.eventDate), value.imageFile, value.authorId, key);
           }
           if(incidentsSub2Check == true && value.eventSubType == 'Wypadek') {
-            _addImageMarkerIncident(location, value.title, value.snippet, DateTime.parse(value.eventDate), File(value.imageFile), value.authorId, key);
+            _addImageMarkerIncident(location, value.title, value.snippet, DateTime.parse(value.eventDate), value.imageFile, value.authorId, key);
           }
           if(incidentsSub3Check == true && value.eventSubType == 'Dzikie zwierzęta') {
-            _addImageMarkerIncident(location, value.title, value.snippet, DateTime.parse(value.eventDate), File(value.imageFile), value.authorId, key);
+            _addImageMarkerIncident(location, value.title, value.snippet, DateTime.parse(value.eventDate), value.imageFile, value.authorId, key);
           }
           if(incidentsSub4Check == true && value.eventSubType == 'Bezpańskie zwierzęta') {
-            _addImageMarkerIncident(location, value.title, value.snippet, DateTime.parse(value.eventDate), File(value.imageFile), value.authorId, key);
+            _addImageMarkerIncident(location, value.title, value.snippet, DateTime.parse(value.eventDate), value.imageFile, value.authorId, key);
           }
         }
       });
@@ -194,15 +194,14 @@ class MapScreenState extends State<MapScreen> {
     String title,
     String snippet,
     DateTime eventDate,
-    File? image,
+    String image,
     String? authorUId,
     String idIncident,
   ) async {
     int likes = await eventController.checkLikes(idIncident);
-    var selectedImageFile = image;
-    if (selectedImageFile != null) {
+    if (image != null) {
       final img.Image originalImage =
-          img.decodeImage(selectedImageFile.readAsBytesSync())!;
+      img.decodeImage(iconMap[image]!)!;
 
       const int targetWidth = 100; // Dostosuj szerokość
       const int targetHeight = 100; // Dostosuj wysokość
@@ -363,7 +362,7 @@ class MapScreenState extends State<MapScreen> {
         );
         eventDetailsMapIncident[location] = eventDetailsIncident;
         isAddingMarker = false;
-        selectedImageFile = null; // Usuń wybrany obraz po dodaniu znacznika
+        //selectedImageFile = null; // Usuń wybrany obraz po dodaniu znacznika
       });
     }
   }
@@ -374,15 +373,16 @@ class MapScreenState extends State<MapScreen> {
     String snippet,
     DateTime eventDate,
     DateTime eventEnd,
-    File? image,
+    String image,
+    //File? image,
     String? authorUId,
     String idEvent,
   ) async {
     int likes = await eventController.checkLikes(idEvent);
-    var selectedImageFile = image;
-    if (selectedImageFile != null) {
+    //File? selectedImageFile = image;
+    if (image != null) {
       final img.Image originalImage =
-          img.decodeImage(selectedImageFile.readAsBytesSync())!;
+          img.decodeImage(iconMap[image]!)!;
 
       const int targetWidth = 180; // Dostosuj szerokość
       const int targetHeight = 180; // Dostosuj wysokość
@@ -664,7 +664,7 @@ class MapScreenState extends State<MapScreen> {
         );
         eventDetailsMap[location] = eventDetails;
         isAddingMarker = false;
-        selectedImageFile = null; // Usuń wybrany obraz po dodaniu znacznika
+        //selectedImageFile = null; // Usuń wybrany obraz po dodaniu znacznika
       });
     }
   }
@@ -858,14 +858,14 @@ class MapScreenState extends State<MapScreen> {
                                 if (title.isNotEmpty &&
                                     snippet.isNotEmpty &&
                                     imageFile != null) {
-                                  selectedImageFile = imageFile;
+                                  //selectedImageFile = imageFile;
                                   if (eventType == 'Wydarzenie' &&
                                       eventEnd != null) {
                                     // Dodaj wydarzenie z datą zakończenia
                                     EventModel event_model = EventModel(
                                       title: title,
                                       snippet: snippet,
-                                      imageFile: imageFile.path,
+                                      imageFile: imageFile,
                                       eventType: eventType.toString(),
                                       eventSubType: eventSubType.toString(),
                                       location: latLng.toString(),
@@ -884,7 +884,7 @@ class MapScreenState extends State<MapScreen> {
                                         IncidentModel(
                                       title: title,
                                       snippet: snippet,
-                                      imageFile: imageFile.path,
+                                      imageFile: imageFile,
                                       eventType: eventType.toString(),
                                       eventSubType: eventSubType.toString(),
                                       location: latLng.toString(),

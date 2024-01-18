@@ -9,8 +9,10 @@ import 'package:inzynierka/Ekrany/controllers/event_controller.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:inzynierka/Reusable_widgets/reusable_widget.dart';
 
+import '../Features/functions.dart';
+
 class MarkerDetailsScreen extends StatefulWidget {
-  final void Function(String title, String snippet, File? imageFile,
+  final void Function(String title, String snippet, String? imageFileName,
       String? eventType,String? eventSubType, DateTime? eventDate, DateTime? eventEnd) onMarkerSaved;
 
   const MarkerDetailsScreen({
@@ -27,6 +29,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
   String title = '';
   String snippet = '';
   File? imageFile;
+  String? imageFileName;
   String? eventType;
   DateTime? eventDate;
   DateTime? eventEnd;
@@ -68,6 +71,16 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
     "Dzikie zwierzęta": 'lib/images/dzikie_zwierzeta.png',
     "Bezpańskie zwierzęta": 'lib/images/bezpanskie_zwierzeta.png',
   };
+  final Map<String, String> eventImagesStorage = {
+    "Koncert": 'koncert.png',
+    "Kradzież": 'kradzież.png',
+    "Wystawa": 'wystawa.png',
+    "Festyn": 'festyn.png',
+    "Zlot społeczności": 'zlot.png',
+    "Wypadek": 'wypadek.png',
+    "Dzikie zwierzęta": 'dzikie_zwierzeta.png',
+    "Bezpańskie zwierzęta": 'bezpanskie_zwierzeta.png',
+  };
 
   Future<void> _loadEventImage(String eventType) async {
     final imageAssetPath = eventImages[eventType];
@@ -83,6 +96,7 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
 
       setState(() {
         imageFile = tempFile;
+        imageFileName = eventImagesStorage[eventType];
       });
     }
   }
@@ -97,10 +111,11 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                   final pickedFile = await ImagePicker().pickImage(
                     source: ImageSource.gallery,
                   );
-
+                  await cloudStorageUploadDefault("default", pickedFile);
                   if (pickedFile != null) {
                     setState(() {
                       imageFile = File(pickedFile.path);
+                      imageFileName = pickedFile.name;
                     });
                   }
                 },
@@ -389,12 +404,12 @@ class _MarkerDetailsScreenState extends State<MarkerDetailsScreen> {
                   } else if (eventSubType == null) {
                     _showSnackbar(context, 'Wybierz wydarzenie lub incydent');
                   } else {
-                    widget.onMarkerSaved(title, snippet, imageFile, eventType, eventSubType,
+                    widget.onMarkerSaved(title, snippet, imageFileName, eventType, eventSubType,
                         eventDate, eventEnd); // Przekaż endDate
                     Navigator.pop(context, {
                       'title': title,
                       'snippet': snippet,
-                      'imageFile': imageFile,
+                      'imageFile': imageFileName,
                       'eventType': eventType,
                       'eventSubType': eventSubType,
                       'eventDate': eventDate,

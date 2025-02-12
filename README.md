@@ -1,16 +1,4 @@
-# inzynierka
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Celem niniejszej pracy inżynierskiej było stworzenie aplikacji mobilnej umożliwiającej użytkownikom dodawanie wydarzeń i incydentów na interaktywnej mapie. Aplikacja
+została opracowana z myślą o dostarczeniu intuicyjnego narzędzia, które pozwala na dzielenie się informacjami w lokalnej społeczności. Główne funkcjonalności obejmują dodawanie wydarzeń z uwzględnieniem nazwy, opisu, lokalizacji oraz kategorii, co umożliwia
+użytkownikom szybkie identyfikowanie obszarów wymagających uwagi. Aplikacja zapewnia interaktywne przedstawienie danych na mapie, umożliwiając użytkownikom śledzenie
+bieżących wydarzeń i reagowanie na wydarzenia.
